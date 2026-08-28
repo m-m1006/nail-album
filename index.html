@@ -22,7 +22,16 @@ function chooser(){$("choices").innerHTML=C.map(c=>`<button class="secondary cho
 function pick(id){co=id;closeM("choose");add()}
 function add(){edit=0;cur=0;$("ft").textContent="サンプル登録";$("fc").textContent="← "+cn(co);let n=S.filter(s=>s.c==co).map(s=>+(s.name.match(/(\d+)$/)||[0,0])[1]);$("sn").value=cn(co)+(Math.max(0,...n)+1);$("ms").value="";$("mm").value="";$("df").value="";$("mf").value="";$("form").classList.add("open")}
 function file(f){return new Promise(r=>{if(!f)return r("");let x=new FileReader();x.onload=()=>r(x.result);x.readAsDataURL(f)})}
-async function save(){let name=$("sn").value.trim(),d=await file($("df").files[0]),m=await file($("mf").files[0]);if(!name||(!d&&!edit)){alert("サンプル名とデザイン写真を入れてね");return}if(edit){let s=S.find(x=>x.id==cur);s.name=name;s.ms=$("ms").value;s.mm=$("mm").value;if(d)s.d=d;if(m)s.m=m}else S.push({id:Date.now(),c:co,name,d,m,ms:$("ms").value,mm:$("mm").value,staff:"自分",date:new Date().toLocaleDateString("ja-JP"),t:Date.now()});data();closeM("form");list(co)}
+async function save(){const name=$("sn").value.trim();if(!name){alert("サンプル名を入れてね");return;}
+const designFile=$("df").files[0];
+const materialFile=$("mf").files[0];
+if(!edit && !designFile){alert("デザイン写真を1枚選んでね");return;}
+try{
+const d=await file(designFile);
+const m=await file(materialFile);
+if(edit){const s=S.find(x=>x.id==cur);s.name=name;s.ms=$("ms").value;s.mm=$("mm").value;if(d) s.d=d;if(m) s.m=m;}
+else{S.push({id:Date.now(),c:co,name:name,d:d,m:m,ms:$("ms").value,mm:$("mm").value,staff:"自分",date:new Date().toLocaleDateString("ja-JP"),t:Date.now()});}
+data();closeM("form");home();list(co);}catch(e){console.error(e);alert("保存できませんでした。もう一度試してみてね。");}}
 function detail(id){cur=id;let s=S.find(x=>x.id==id);$("db").innerHTML=`<div class="photo">${s.d?`<img src="${s.d}" onclick="window.open(this.src)">`:"📸"}</div><div class="title">${esc(s.name)}</div><div class="info"><div class="label">使用商材</div><div class="memo">${esc(s.ms)||"未入力"}</div></div>${s.m?`<div class="info"><div class="label">商材写真</div><div class="photo"><img src="${s.m}" onclick="window.open(this.src)"></div></div>`:""}<div class="info"><div class="label">メモ</div><div class="memo">${esc(s.mm)||"なし"}</div></div><div class="meta">作成：${s.staff} ・ ${s.date}</div><div class="actions"><button class="secondary" onclick="editS()">✏️ 編集</button><button class="danger" onclick="del()">削除</button></div>`;go("detail")}
 function editS(){let s=S.find(x=>x.id==cur);co=s.c;edit=1;$("ft").textContent="サンプルを編集";$("fc").textContent="← "+cn(co);$("sn").value=s.name;$("ms").value=s.ms;$("mm").value=s.mm;$("df").value="";$("mf").value="";$("form").classList.add("open")}
 function del(){if(confirm("このサンプルを削除する？")){S=S.filter(x=>x.id!=cur);data();list(co)}}
