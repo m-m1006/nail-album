@@ -6,9 +6,7 @@
 <title>Nail Album</title>
 
 <style>
-*{
-  box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
   margin:0;
@@ -17,7 +15,7 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
 }
 
-button,input,textarea{
+button,input,textarea,select{
   font:inherit;
 }
 
@@ -165,6 +163,7 @@ h3{
 .meta{
   font-size:12px;
   color:#999;
+  margin-top:4px;
 }
 
 .actions,
@@ -243,12 +242,14 @@ label{
 }
 
 input,
-textarea{
+textarea,
+select{
   width:100%;
   padding:11px;
   margin-top:5px;
   border:1px solid #ddd;
   border-radius:10px;
+  background:#fff;
 }
 
 textarea{
@@ -273,26 +274,34 @@ textarea{
   padding-top:20px;
 }
 
-.category-row{
+.manage button{
+  margin-bottom:8px;
+}
+
+.category-row,
+.staff-row{
   display:flex;
   align-items:center;
   gap:7px;
   margin:8px 0;
 }
 
-.category-row input{
+.category-row input,
+.staff-row input{
   margin:0;
   flex:1;
 }
 
-.category-row button{
+.category-row button,
+.staff-row button{
   border:0;
   border-radius:9px;
   padding:10px;
   background:#eee9e7;
 }
 
-.category-row .delete-cat{
+.category-row .delete-cat,
+.staff-row .delete-staff{
   color:#a33;
   background:#f8e5e5;
 }
@@ -310,6 +319,16 @@ textarea{
   font-size:13px;
   color:#999;
   padding:10px;
+}
+
+.staff-badge{
+  display:inline-block;
+  background:#eee9e7;
+  color:#554f4c;
+  padding:5px 9px;
+  border-radius:8px;
+  font-size:12px;
+  margin-top:8px;
 }
 </style>
 </head>
@@ -336,9 +355,23 @@ textarea{
   <div id="rows"></div>
 
   <div class="manage">
-    <button class="secondary" style="width:100%" onclick="openCategoryManager()">
+
+    <button
+      class="secondary"
+      style="width:100%"
+      onclick="openCategoryManager()"
+    >
       ⚙️ カテゴリーを管理
     </button>
+
+    <button
+      class="secondary"
+      style="width:100%"
+      onclick="openStaffManager()"
+    >
+      👤 スタッフを管理
+    </button>
+
   </div>
 
 </section>
@@ -419,6 +452,9 @@ textarea{
     <label>サンプル名</label>
     <input id="sn">
 
+    <label>作成者</label>
+    <select id="staffSelect"></select>
+
     <label>使用商材</label>
     <textarea
       id="ms"
@@ -497,6 +533,49 @@ textarea{
 </div>
 
 
+<!-- スタッフ管理 -->
+<div id="staffManager" class="modal">
+
+  <div class="sheet">
+
+    <h2>👤 スタッフを管理</h2>
+
+    <div class="small">
+      スタッフ名を追加・変更・削除できます。
+    </div>
+
+    <div id="staffList"></div>
+
+    <h3 style="margin-top:25px">
+      新しいスタッフを追加
+    </h3>
+
+    <input
+      id="newStaff"
+      placeholder="例：田中"
+    >
+
+    <button
+      class="primary"
+      style="width:100%;margin-top:10px"
+      onclick="addStaff()"
+    >
+      ＋ スタッフを追加
+    </button>
+
+    <button
+      class="secondary choice"
+      style="margin-top:15px"
+      onclick="closeM('staffManager')"
+    >
+      閉じる
+    </button>
+
+  </div>
+
+</div>
+
+
 <script>
 
 /* =====================================================
@@ -516,11 +595,216 @@ let categories = JSON.parse(
   ])
 );
 
-let S = [];
 
-let co = 1;
-let cur = 0;
-let edit = 0;
+/* =====================================================
+   スタッフ
+===================================================== */
+
+let staffs = JSON.parse(
+  localStorage.getItem("nail_staffs") ||
+  JSON.stringify([
+    {id:1,name:"自分"}
+  ])
+);
+
+
+function saveStaffs(){
+
+  localStorage.setItem(
+    "nail_staffs",
+    JSON.stringify(staffs)
+  );
+
+}
+
+
+function staffName(id){
+
+  const s =
+    staffs.find(x=>x.id==id);
+
+  return s
+    ? s.name
+    : "自分";
+
+}
+
+
+function openStaffManager(){
+
+  renderStaffManager();
+
+  $("staffManager").classList.add("open");
+
+}
+
+
+function renderStaffManager(){
+
+  $("staffList").innerHTML =
+    staffs.map(s=>`
+
+      <div class="staff-row">
+
+        <input
+          value="${esc(s.name)}"
+          onchange="renameStaff(${s.id},this.value)"
+        >
+
+        <button
+          onclick="renameStaff(${s.id},this.previousElementSibling.value)"
+        >
+          保存
+        </button>
+
+        <button
+          class="delete-staff"
+          onclick="removeStaff(${s.id})"
+        >
+          削除
+        </button>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+function renameStaff(id,name){
+
+  name=name.trim();
+
+  if(!name){
+
+    alert("スタッフ名を入力してね");
+
+    renderStaffManager();
+
+    return;
+
+  }
+
+  const duplicate =
+    staffs.some(
+      s =>
+        s.id!==id &&
+        s.name===name
+    );
+
+  if(duplicate){
+
+    alert("同じ名前のスタッフがいます");
+
+    renderStaffManager();
+
+    return;
+
+  }
+
+  const s =
+    staffs.find(x=>x.id===id);
+
+  if(s){
+
+    s.name=name;
+
+  }
+
+  saveStaffs();
+
+  renderStaffManager();
+
+}
+
+
+function addStaff(){
+
+  const input=$("newStaff");
+
+  const name=input.value.trim();
+
+  if(!name){
+
+    alert("スタッフ名を入力してね");
+
+    return;
+
+  }
+
+  if(
+    staffs.some(
+      s=>s.name===name
+    )
+  ){
+
+    alert("同じ名前のスタッフがいます");
+
+    return;
+
+  }
+
+  const id =
+    staffs.length
+      ? Math.max(...staffs.map(s=>s.id))+1
+      : 1;
+
+  staffs.push({
+    id,
+    name
+  });
+
+  saveStaffs();
+
+  input.value="";
+
+  renderStaffManager();
+
+}
+
+
+function removeStaff(id){
+
+  if(staffs.length<=1){
+
+    alert("スタッフは最低1人必要です");
+
+    return;
+
+  }
+
+  const s =
+    staffs.find(x=>x.id===id);
+
+  if(!s) return;
+
+  if(
+    !confirm(
+      `「${s.name}」を削除する？`
+    )
+  ) return;
+
+  staffs =
+    staffs.filter(
+      x=>x.id!==id
+    );
+
+  saveStaffs();
+
+  renderStaffManager();
+
+}
+
+
+/* =====================================================
+   データ
+===================================================== */
+
+let S=[];
+
+let co=1;
+let cur=0;
+let edit=0;
 
 let db;
 
@@ -536,46 +820,55 @@ function openDB(){
     const request =
       indexedDB.open(DB_NAME,DB_VERSION);
 
-    request.onupgradeneeded = function(e){
+    request.onupgradeneeded =
+      function(e){
 
-      const database = e.target.result;
+        const database =
+          e.target.result;
 
-      if(!database.objectStoreNames.contains(STORE)){
+        if(
+          !database.objectStoreNames.contains(STORE)
+        ){
 
-        const store =
-          database.createObjectStore(
-            STORE,
-            {keyPath:"id"}
+          const store =
+            database.createObjectStore(
+              STORE,
+              {keyPath:"id"}
+            );
+
+          store.createIndex(
+            "category",
+            "c",
+            {unique:false}
           );
 
-        store.createIndex(
-          "category",
-          "c",
-          {unique:false}
-        );
+          store.createIndex(
+            "time",
+            "t",
+            {unique:false}
+          );
 
-        store.createIndex(
-          "time",
-          "t",
-          {unique:false}
-        );
-      }
+        }
 
-    };
+      };
 
-    request.onsuccess = function(e){
 
-      db=e.target.result;
+    request.onsuccess =
+      function(e){
 
-      resolve(db);
+        db=e.target.result;
 
-    };
+        resolve(db);
 
-    request.onerror = function(){
+      };
 
-      reject(request.error);
 
-    };
+    request.onerror =
+      function(){
+
+        reject(request.error);
+
+      };
 
   });
 
@@ -586,18 +879,30 @@ function getAllSamples(){
 
   return new Promise((resolve,reject)=>{
 
-    const tx=db.transaction(STORE,"readonly");
+    const tx =
+      db.transaction(
+        STORE,
+        "readonly"
+      );
 
-    const store=tx.objectStore(STORE);
+    const store =
+      tx.objectStore(STORE);
 
-    const request=store.getAll();
+    const request =
+      store.getAll();
 
     request.onsuccess=()=>{
-      resolve(request.result || []);
+
+      resolve(
+        request.result || []
+      );
+
     };
 
     request.onerror=()=>{
+
       reject(request.error);
+
     };
 
   });
@@ -609,16 +914,24 @@ function putSample(sample){
 
   return new Promise((resolve,reject)=>{
 
-    const tx=db.transaction(STORE,"readwrite");
+    const tx =
+      db.transaction(
+        STORE,
+        "readwrite"
+      );
 
     tx.objectStore(STORE).put(sample);
 
     tx.oncomplete=()=>{
+
       resolve();
+
     };
 
     tx.onerror=()=>{
+
       reject(tx.error);
+
     };
 
   });
@@ -630,16 +943,24 @@ function deleteSample(id){
 
   return new Promise((resolve,reject)=>{
 
-    const tx=db.transaction(STORE,"readwrite");
+    const tx =
+      db.transaction(
+        STORE,
+        "readwrite"
+      );
 
     tx.objectStore(STORE).delete(id);
 
     tx.oncomplete=()=>{
+
       resolve();
+
     };
 
     tx.onerror=()=>{
+
       reject(tx.error);
+
     };
 
   });
@@ -648,7 +969,7 @@ function deleteSample(id){
 
 
 /* =====================================================
-   旧データの移行
+   旧データ移行
 ===================================================== */
 
 async function migrateOldData(){
@@ -656,28 +977,52 @@ async function migrateOldData(){
   try{
 
     const old =
-      JSON.parse(localStorage.getItem("na") || "[]");
+      JSON.parse(
+        localStorage.getItem("na") || "[]"
+      );
 
     if(!old.length) return;
 
     const migrated =
-      localStorage.getItem("nail_migrated");
+      localStorage.getItem(
+        "nail_migrated"
+      );
 
     if(migrated==="yes") return;
 
     for(const s of old){
 
       const sample={
+
         id:s.id,
+
         c:s.c,
+
         name:s.name,
-        d:s.d ? dataURLtoBlob(s.d) : null,
-        m:s.m ? dataURLtoBlob(s.m) : null,
+
+        d:s.d
+          ? dataURLtoBlob(s.d)
+          : null,
+
+        m:s.m
+          ? dataURLtoBlob(s.m)
+          : null,
+
         ms:s.ms || "",
+
         mm:s.mm || "",
+
         staff:s.staff || "自分",
-        date:s.date || new Date().toLocaleDateString("ja-JP"),
-        t:s.t || Date.now()
+
+        date:
+          s.date ||
+          new Date()
+            .toLocaleDateString("ja-JP"),
+
+        t:
+          s.t ||
+          Date.now()
+
       };
 
       await putSample(sample);
@@ -691,7 +1036,10 @@ async function migrateOldData(){
 
   }catch(e){
 
-    console.log("旧データ移行エラー",e);
+    console.log(
+      "旧データ移行エラー",
+      e
+    );
 
   }
 
@@ -700,20 +1048,29 @@ async function migrateOldData(){
 
 function dataURLtoBlob(dataURL){
 
-  const parts=dataURL.split(",");
+  const parts =
+    dataURL.split(",");
 
-  const mime=
-    parts[0].match(/:(.*?);/)[1];
+  const mime =
+    parts[0]
+      .match(/:(.*?);/)[1];
 
-  const binary=
+  const binary =
     atob(parts[1]);
 
-  const arr=
-    new Uint8Array(binary.length);
+  const arr =
+    new Uint8Array(
+      binary.length
+    );
 
-  for(let i=0;i<binary.length;i++){
+  for(
+    let i=0;
+    i<binary.length;
+    i++
+  ){
 
-    arr[i]=binary.charCodeAt(i);
+    arr[i] =
+      binary.charCodeAt(i);
 
   }
 
@@ -741,10 +1098,14 @@ function saveCategories(){
 
 function cn(id){
 
-  const c=
-    categories.find(x=>x.id==id);
+  const c =
+    categories.find(
+      x=>x.id==id
+    );
 
-  return c ? c.name : "未分類";
+  return c
+    ? c.name
+    : "未分類";
 
 }
 
@@ -753,14 +1114,16 @@ function openCategoryManager(){
 
   renderCategoryManager();
 
-  $("categoryManager").classList.add("open");
+  $("categoryManager")
+    .classList
+    .add("open");
 
 }
 
 
 function renderCategoryManager(){
 
-  $("categoryList").innerHTML=
+  $("categoryList").innerHTML =
     categories.map(c=>`
 
       <div class="category-row">
@@ -796,7 +1159,9 @@ function renameCategory(id,name){
 
   if(!name){
 
-    alert("カテゴリー名を入力してね");
+    alert(
+      "カテゴリー名を入力してね"
+    );
 
     renderCategoryManager();
 
@@ -804,15 +1169,18 @@ function renameCategory(id,name){
 
   }
 
-  const duplicate=
+  const duplicate =
     categories.some(
-      c=>c.id!==id &&
-      c.name===name
+      c =>
+        c.id!==id &&
+        c.name===name
     );
 
   if(duplicate){
 
-    alert("同じ名前のカテゴリーがあります");
+    alert(
+      "同じ名前のカテゴリーがあります"
+    );
 
     renderCategoryManager();
 
@@ -820,8 +1188,10 @@ function renameCategory(id,name){
 
   }
 
-  const c=
-    categories.find(x=>x.id===id);
+  const c =
+    categories.find(
+      x=>x.id===id
+    );
 
   if(c){
 
@@ -835,9 +1205,12 @@ function renameCategory(id,name){
 
   home();
 
-  if($("list").classList.contains("active")){
+  if(
+    $("list").classList.contains("active")
+  ){
 
-    $("lt").textContent=cn(co);
+    $("lt").textContent =
+      cn(co);
 
   }
 
@@ -846,31 +1219,41 @@ function renameCategory(id,name){
 
 function addCategory(){
 
-  const input=$("newCategory");
+  const input =
+    $("newCategory");
 
-  const name=input.value.trim();
+  const name =
+    input.value.trim();
 
   if(!name){
 
-    alert("カテゴリー名を入力してね");
+    alert(
+      "カテゴリー名を入力してね"
+    );
 
     return;
 
   }
 
   if(
-    categories.some(c=>c.name===name)
+    categories.some(
+      c=>c.name===name
+    )
   ){
 
-    alert("同じ名前のカテゴリーがあります");
+    alert(
+      "同じ名前のカテゴリーがあります"
+    );
 
     return;
 
   }
 
-  const id=
+  const id =
     categories.length
-      ? Math.max(...categories.map(c=>c.id))+1
+      ? Math.max(
+          ...categories.map(c=>c.id)
+        )+1
       : 1;
 
   categories.push({
@@ -891,8 +1274,10 @@ function addCategory(){
 
 async function removeCategory(id){
 
-  const count=
-    S.filter(s=>s.c==id).length;
+  const count =
+    S.filter(
+      s=>s.c==id
+    ).length;
 
   if(count>0){
 
@@ -906,14 +1291,18 @@ async function removeCategory(id){
 
   if(categories.length<=1){
 
-    alert("カテゴリーは最低1つ必要です");
+    alert(
+      "カテゴリーは最低1つ必要です"
+    );
 
     return;
 
   }
 
-  const c=
-    categories.find(x=>x.id==id);
+  const c =
+    categories.find(
+      x=>x.id===id
+    );
 
   if(
     !confirm(
@@ -921,8 +1310,10 @@ async function removeCategory(id){
     )
   ) return;
 
-  categories=
-    categories.filter(x=>x.id!==id);
+  categories =
+    categories.filter(
+      x=>x.id!==id
+    );
 
   saveCategories();
 
@@ -971,26 +1362,33 @@ function go(id){
 
   document
     .querySelectorAll(".screen")
-    .forEach(x=>
-      x.classList.remove("active")
+    .forEach(
+      x=>x.classList.remove("active")
     );
 
-  $(id).classList.add("active");
+  $(id)
+    .classList
+    .add("active");
 
-  window.scrollTo(0,0);
+  window.scrollTo(
+    0,
+    0
+  );
 
 }
 
 
 function closeM(id){
 
-  $(id).classList.remove("open");
+  $(id)
+    .classList
+    .remove("open");
 
 }
 
 
 /* =====================================================
-   写真表示
+   写真
 ===================================================== */
 
 function imageURL(blob){
@@ -1004,18 +1402,22 @@ function imageURL(blob){
 
 function th(s){
 
-  const image=
+  const image =
     s.d
       ? `<img src="${imageURL(s.d)}">`
       : "📸";
 
   return `
+
     <div
       class="thumb"
       onclick="detail(${s.id})"
     >
+
       ${image}
+
     </div>
+
   `;
 
 }
@@ -1027,13 +1429,17 @@ function th(s){
 
 function home(){
 
-  $("rows").innerHTML=
+  $("rows").innerHTML =
     categories.map(c=>{
 
-      const a=
+      const a =
         S
-          .filter(s=>s.c==c.id)
-          .sort((x,y)=>y.t-x.t)
+          .filter(
+            s=>s.c==c.id
+          )
+          .sort(
+            (x,y)=>y.t-x.t
+          )
           .slice(0,5);
 
       return `
@@ -1089,7 +1495,8 @@ function list(id){
 
   co=id;
 
-  $("lt").textContent=cn(co);
+  $("lt").textContent =
+    cn(co);
 
   $("search").value="";
 
@@ -1102,21 +1509,26 @@ function list(id){
 
 function renderList(){
 
-  const keyword=
-    $("search").value
+  const keyword =
+    $("search")
+      .value
       .trim()
       .toLowerCase();
 
-  let a=
+  let a =
     S
-      .filter(s=>s.c==co)
-      .sort((x,y)=>y.t-x.t);
+      .filter(
+        s=>s.c==co
+      )
+      .sort(
+        (x,y)=>y.t-x.t
+      );
 
   if(keyword){
 
-    a=
+    a =
       a.filter(
-        s=>
+        s =>
           s.name
             .toLowerCase()
             .includes(keyword)
@@ -1124,7 +1536,7 @@ function renderList(){
 
   }
 
-  $("grid").innerHTML=
+  $("grid").innerHTML =
     a.length
       ? a.map(th).join("")
       : `
@@ -1149,7 +1561,7 @@ function renderList(){
 
 function chooser(){
 
-  $("choices").innerHTML=
+  $("choices").innerHTML =
     categories.map(c=>`
 
       <button
@@ -1161,7 +1573,9 @@ function chooser(){
 
     `).join("");
 
-  $("choose").classList.add("open");
+  $("choose")
+    .classList
+    .add("open");
 
 }
 
@@ -1177,35 +1591,67 @@ function pick(id){
 }
 
 
+function renderStaffSelect(selected){
+
+  $("staffSelect").innerHTML =
+    staffs.map(s=>`
+
+      <option
+        value="${s.id}"
+        ${String(s.id)===String(selected) ? "selected":""}
+      >
+        ${esc(s.name)}
+      </option>
+
+    `).join("");
+
+}
+
+
 function add(){
 
   edit=0;
 
   cur=0;
 
-  $("ft").textContent="サンプル登録";
+  $("ft").textContent =
+    "サンプル登録";
 
-  $("fc").textContent="← "+cn(co);
+  $("fc").textContent =
+    "← "+cn(co);
 
-  const numbers=
+  const numbers =
     S
-      .filter(s=>s.c==co)
+      .filter(
+        s=>s.c==co
+      )
       .map(
         s=>{
-          const match=
-            s.name.match(/(\d+)$/);
+
+          const match =
+            s.name.match(
+              /(\d+)$/
+            );
 
           return match
             ? Number(match[1])
             : 0;
+
         }
       );
 
-  const next=
-    Math.max(0,...numbers)+1;
+  const next =
+    Math.max(
+      0,
+      ...numbers
+    )+1;
 
-  $("sn").value=
+  $("sn").value =
     cn(co)+next;
+
+  renderStaffSelect(
+    staffs[0]?.id
+  );
 
   $("ms").value="";
 
@@ -1217,7 +1663,9 @@ function add(){
 
   $("saveStatus").textContent="";
 
-  $("form").classList.add("open");
+  $("form")
+    .classList
+    .add("open");
 
 }
 
@@ -1226,45 +1674,21 @@ function add(){
    ファイル
 ===================================================== */
 
-function file(f){
-
-  return new Promise(resolve=>{
-
-    if(!f){
-
-      resolve(null);
-
-      return;
-
-    }
-
-    const reader=
-      new FileReader();
-
-    reader.onload=()=>{
-      resolve(reader.result);
-    };
-
-    reader.readAsDataURL(f);
-
-  });
-
-}
-
-
 async function dataURLFile(f){
 
   if(!f) return null;
 
   return new Promise(resolve=>{
 
-    const reader=
+    const reader =
       new FileReader();
 
     reader.onload=()=>{
 
       resolve(
-        dataURLtoBlob(reader.result)
+        dataURLtoBlob(
+          reader.result
+        )
       );
 
     };
@@ -1282,16 +1706,22 @@ async function dataURLFile(f){
 
 async function save(){
 
-  const status=$("saveStatus");
+  const status =
+    $("saveStatus");
 
-  status.textContent="保存中…";
+  status.textContent =
+    "保存中…";
 
-  const name=
-    $("sn").value.trim();
+  const name =
+    $("sn")
+      .value
+      .trim();
 
   if(!name){
 
-    alert("サンプル名を入れてね");
+    alert(
+      "サンプル名を入れてね"
+    );
 
     status.textContent="";
 
@@ -1301,12 +1731,12 @@ async function save(){
 
   try{
 
-    let d=
+    let d =
       await dataURLFile(
         $("df").files[0]
       );
 
-    let m=
+    let m =
       await dataURLFile(
         $("mf").files[0]
       );
@@ -1314,20 +1744,31 @@ async function save(){
 
     if(edit){
 
-      const s=
-        S.find(x=>x.id==cur);
+      const s =
+        S.find(
+          x=>x.id==cur
+        );
 
       if(!s){
 
-        throw new Error("サンプルが見つかりません");
+        throw new Error(
+          "サンプルが見つかりません"
+        );
 
       }
 
       s.name=name;
 
-      s.ms=$("ms").value;
+      s.staff =
+        Number(
+          $("staffSelect").value
+        );
 
-      s.mm=$("mm").value;
+      s.ms =
+        $("ms").value;
+
+      s.mm =
+        $("mm").value;
 
       if(d) s.d=d;
 
@@ -1365,10 +1806,16 @@ async function save(){
 
         mm:$("mm").value,
 
-        staff:"自分",
+        staff:
+          Number(
+            $("staffSelect").value
+          ),
 
-        date:new Date()
-          .toLocaleDateString("ja-JP"),
+        date:
+          new Date()
+            .toLocaleDateString(
+              "ja-JP"
+            ),
 
         t:Date.now()
 
@@ -1385,15 +1832,13 @@ async function save(){
 
     status.textContent="";
 
-    if(edit){
+    await reload();
 
-      await reload();
+    if(edit){
 
       detail(cur);
 
     }else{
-
-      await reload();
 
       list(co);
 
@@ -1422,13 +1867,15 @@ function detail(id){
 
   cur=id;
 
-  const s=
-    S.find(x=>x.id==id);
+  const s =
+    S.find(
+      x=>x.id==id
+    );
 
   if(!s) return;
 
 
-  const design=
+  const design =
     s.d
       ? `
         <img
@@ -1439,7 +1886,7 @@ function detail(id){
       : "📸";
 
 
-  const material=
+  const material =
     s.m
       ? `
         <div class="info">
@@ -1462,7 +1909,7 @@ function detail(id){
       : "";
 
 
-  $("db").innerHTML=`
+  $("db").innerHTML = `
 
     <div class="photo">
       ${design}
@@ -1498,13 +1945,31 @@ function detail(id){
 
     </div>
 
-    <div class="meta">
-      カテゴリー：${esc(cn(s.c))}
+    <div class="info">
+
+      <div class="label">
+        作成者
+      </div>
+
+      <div>
+        <span class="staff-badge">
+          👤 ${esc(
+            typeof s.staff==="number"
+              ? staffName(s.staff)
+              : s.staff || "自分"
+          )}
+        </span>
+      </div>
+
     </div>
 
     <div class="meta">
-      作成：${esc(s.staff)}
-      ・
+      カテゴリー：
+      ${esc(cn(s.c))}
+    </div>
+
+    <div class="meta">
+      作成日：
       ${esc(s.date)}
     </div>
 
@@ -1535,7 +2000,10 @@ function detail(id){
 
 function openImage(src){
 
-  window.open(src,"_blank");
+  window.open(
+    src,
+    "_blank"
+  );
 
 }
 
@@ -1546,8 +2014,10 @@ function openImage(src){
 
 function editS(){
 
-  const s=
-    S.find(x=>x.id==cur);
+  const s =
+    S.find(
+      x=>x.id==cur
+    );
 
   if(!s) return;
 
@@ -1555,17 +2025,26 @@ function editS(){
 
   edit=1;
 
-  $("ft").textContent=
+  $("ft").textContent =
     "サンプルを編集";
 
-  $("fc").textContent=
+  $("fc").textContent =
     "← "+cn(co);
 
-  $("sn").value=s.name;
+  $("sn").value =
+    s.name;
 
-  $("ms").value=s.ms||"";
+  renderStaffSelect(
+    typeof s.staff==="number"
+      ? s.staff
+      : staffs[0]?.id
+  );
 
-  $("mm").value=s.mm||"";
+  $("ms").value =
+    s.ms || "";
+
+  $("mm").value =
+    s.mm || "";
 
   $("df").value="";
 
@@ -1573,7 +2052,9 @@ function editS(){
 
   $("saveStatus").textContent="";
 
-  $("form").classList.add("open");
+  $("form")
+    .classList
+    .add("open");
 
 }
 
@@ -1594,8 +2075,10 @@ async function del(){
 
     await deleteSample(cur);
 
-    S=
-      S.filter(x=>x.id!=cur);
+    S =
+      S.filter(
+        x=>x.id!=cur
+      );
 
     list(co);
 
@@ -1611,12 +2094,12 @@ async function del(){
 
 
 /* =====================================================
-   データ再読み込み
+   再読み込み
 ===================================================== */
 
 async function reload(){
 
-  S=
+  S =
     await getAllSamples();
 
 }
@@ -1626,23 +2109,27 @@ async function reload(){
    起動
 ===================================================== */
 
-$("hp").onclick=chooser;
+$("hp").onclick =
+  chooser;
 
-$("lp").onclick=add;
+$("lp").onclick =
+  add;
 
-$("bh").onclick=()=>{
+$("bh").onclick =
+  ()=>{
 
-  home();
+    home();
 
-  go("home");
+    go("home");
 
-};
+  };
 
-$("bl").onclick=()=>{
+$("bl").onclick =
+  ()=>{
 
-  list(co);
+    list(co);
 
-};
+  };
 
 
 (async function(){
