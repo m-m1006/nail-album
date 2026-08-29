@@ -217,11 +217,13 @@ h3{
   display:flex;
 }
 
+/* 下のタブ・ホームバーにボタンが隠れないように修正 */
 .sheet{
   background:#fff;
   width:min(520px,100%);
   margin:auto;
   padding:20px;
+  padding-bottom:calc(50px + env(safe-area-inset-bottom));
   border-radius:22px 22px 0 0;
   max-height:92vh;
   overflow:auto;
