@@ -217,13 +217,11 @@ h3{
   display:flex;
 }
 
-/* 下のタブ・ホームバーにボタンが隠れないように修正 */
 .sheet{
   background:#fff;
   width:min(520px,100%);
   margin:auto;
   padding:20px;
-  padding-bottom:calc(50px + env(safe-area-inset-bottom));
   border-radius:22px 22px 0 0;
   max-height:92vh;
   overflow:auto;
@@ -309,11 +307,31 @@ textarea{
 }
 
 .search-box{
-  margin:15px 0;
+  margin:15px 0 10px;
 }
 
 .search-box input{
   margin:0;
+}
+
+.sort-box{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.sort-box span{
+  font-size:12px;
+  color:#999;
+  font-weight:bold;
+  white-space:nowrap;
+}
+
+.sort-box select{
+  margin:0;
+  padding:9px 10px;
+  flex:1;
 }
 
 .status{
@@ -396,6 +414,16 @@ textarea{
       placeholder="🔍 サンプル名を検索"
       oninput="renderList()"
     >
+  </div>
+
+  <div class="sort-box">
+    <span>並び替え</span>
+
+    <select id="sortOrder" onchange="renderList()">
+      <option value="new">🆕 新しい順</option>
+      <option value="old">🕐 古い順</option>
+      <option value="name">🔤 名前順</option>
+    </select>
   </div>
 
   <div id="grid" class="grid"></div>
@@ -1502,6 +1530,8 @@ function list(id){
 
   $("search").value="";
 
+  $("sortOrder").value="new";
+
   renderList();
 
   go("list");
@@ -1517,13 +1547,13 @@ function renderList(){
       .trim()
       .toLowerCase();
 
+  const sortOrder =
+    $("sortOrder").value;
+
   let a =
     S
       .filter(
         s=>s.c==co
-      )
-      .sort(
-        (x,y)=>y.t-x.t
       );
 
   if(keyword){
@@ -1537,6 +1567,40 @@ function renderList(){
       );
 
   }
+
+
+  /* =========================
+     並び替え
+  ========================= */
+
+  if(sortOrder==="new"){
+
+    a.sort(
+      (x,y)=>y.t-x.t
+    );
+
+  }
+
+  else if(sortOrder==="old"){
+
+    a.sort(
+      (x,y)=>x.t-y.t
+    );
+
+  }
+
+  else if(sortOrder==="name"){
+
+    a.sort(
+      (x,y)=>
+        x.name.localeCompare(
+          y.name,
+          "ja"
+        )
+    );
+
+  }
+
 
   $("grid").innerHTML =
     a.length
