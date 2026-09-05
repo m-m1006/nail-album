@@ -2304,33 +2304,61 @@ $("bl").onclick =
 
   checkLogin();
 
-  // ===== ログイン中のスタッフ情報を取得 =====
-  async function loadCurrentStaff() {
-    const { data: { user }, error: userError } =
-      await supabaseClient.auth.getUser();
+ // ===== ログイン中のスタッフ情報を取得 =====
+async function loadCurrentStaff() {
 
-    if (userError || !user) {
-      console.log("ログインユーザーが見つかりません");
-      return null;
-    }
+  const {
+    data: { user },
+    error: userError
+  } = await supabaseClient.auth.getUser();
 
-    const { data: staff, error: staffError } =
-      await supabaseClient
-        .from("staff")
-        .select("id, name, store_id")
-        .eq("user_id", user.id)
-        .single();
+  if (userError || !user) {
 
-    if (staffError) {
-      console.error("スタッフ情報の取得に失敗:", staffError);
-      return null;
-    }
+    console.log("ログインユーザーが見つかりません");
 
-    console.log("現在のスタッフ:", staff);
-    return staff;
+    currentUser = null;
+    currentStaff = null;
+
+    return null;
+
   }
 
-  loadCurrentStaff();
+  currentUser = user;
+
+  const {
+    data: staff,
+    error: staffError
+  } = await supabaseClient
+    .from("staff")
+    .select("id, name, store_id")
+    .eq("user_id", user.id)
+    .single();
+
+  if (staffError || !staff) {
+
+    console.error(
+      "スタッフ情報の取得に失敗:",
+      staffError
+    );
+
+    currentStaff = null;
+
+    return null;
+
+  }
+
+  currentStaff = staff;
+
+  console.log("ログインユーザー:", currentUser);
+  console.log("現在のスタッフ:", currentStaff);
+  console.log("スタッフ名:", currentStaff.name);
+  console.log("店舗ID:", currentStaff.store_id);
+
+  return currentStaff;
+
+}
+
+loadCurrentStaff();
 
 </script>
 
