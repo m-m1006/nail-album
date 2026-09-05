@@ -2244,6 +2244,62 @@ $("bl").onclick =
 
 })();
 
+  // ===== Supabaseログイン =====
+  const loginScreen = document.getElementById("loginScreen");
+  const appScreen = document.querySelector(".app");
+  const loginButton = document.getElementById("loginButton");
+  const loginEmail = document.getElementById("loginEmail");
+  const loginPassword = document.getElementById("loginPassword");
+  const loginMessage = document.getElementById("loginMessage");
+
+  function showApp() {
+    loginScreen.style.display = "none";
+    appScreen.style.display = "";
+  }
+
+  function showLogin() {
+    loginScreen.style.display = "block";
+    appScreen.style.display = "none";
+  }
+
+  async function checkLogin() {
+    const { data } = await supabaseClient.auth.getSession();
+
+    if (data.session) {
+      showApp();
+    } else {
+      showLogin();
+    }
+  }
+
+  loginButton.addEventListener("click", async () => {
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
+
+    if (!email || !password) {
+      loginMessage.textContent = "メールアドレスとパスワードを入力してください";
+      return;
+    }
+
+    loginMessage.textContent = "ログイン中…";
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+    if (error) {
+      loginMessage.textContent = "ログインできませんでした";
+      console.error(error);
+      return;
+    }
+
+    loginMessage.textContent = "";
+    showApp();
+  });
+
+  checkLogin();
+
 </script>
 
 </div>
