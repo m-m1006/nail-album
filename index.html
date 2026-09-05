@@ -2300,6 +2300,34 @@ $("bl").onclick =
 
   checkLogin();
 
+  // ===== ログイン中のスタッフ情報を取得 =====
+  async function loadCurrentStaff() {
+    const { data: { user }, error: userError } =
+      await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      console.log("ログインユーザーが見つかりません");
+      return null;
+    }
+
+    const { data: staff, error: staffError } =
+      await supabaseClient
+        .from("staff")
+        .select("id, name, store_id")
+        .eq("user_id", user.id)
+        .single();
+
+    if (staffError) {
+      console.error("スタッフ情報の取得に失敗:", staffError);
+      return null;
+    }
+
+    console.log("現在のスタッフ:", staff);
+    return staff;
+  }
+
+  loadCurrentStaff();
+
 </script>
 
 </div>
