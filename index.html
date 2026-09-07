@@ -1478,10 +1478,15 @@ function imageURL(blob){
 
   if(!blob) return "";
 
+  // Supabase Storageの画像URLならそのまま使う
+  if(typeof blob === "string"){
+    return blob;
+  }
+
+  // 以前のIndexedDBのBlobにも対応
   return URL.createObjectURL(blob);
 
 }
-
 
 function th(s){
 
