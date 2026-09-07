@@ -1830,24 +1830,17 @@ async function dataURLFile(f){
 
 async function save(){
 
-  const status =
-    $("saveStatus");
+  const status = $("saveStatus");
 
-  status.textContent =
-    "保存中…";
+  status.textContent = "保存中…";
 
-  const name =
-    $("sn")
-      .value
-      .trim();
+  const name = $("sn").value.trim();
 
   if(!name){
 
-    alert(
-      "サンプル名を入れてね"
-    );
+    alert("サンプル名を入れてね");
 
-    status.textContent="";
+    status.textContent = "";
 
     return;
 
@@ -1855,23 +1848,29 @@ async function save(){
 
   try{
 
-    let d =
-      await dataURLFile(
-        $("df").files[0]
+    if(!currentStaff){
+
+      await loadCurrentStaff();
+
+    }
+
+    if(!currentStaff){
+
+      throw new Error(
+        "ログイン中のスタッフ情報がありません"
       );
 
-    let m =
-      await dataURLFile(
-        $("mf").files[0]
-      );
+    }
 
+    // =========================
+    // 編集の場合
+    // =========================
 
     if(edit){
 
-      const s =
-        S.find(
-          x=>x.id==cur
-        );
+      const s = S.find(
+        x => x.id == cur
+      );
 
       if(!s){
 
@@ -1881,80 +1880,210 @@ async function save(){
 
       }
 
-      s.name=name;
+      const updateData = {
 
-      s.staff =
-        Number(
-          $("staffSelect").value
-        );
+        name: name,
 
-      s.ms =
-        $("ms").value;
+        used_products:
+          $("ms").value,
 
-      s.mm =
-        $("mm").value;
+        memo:
+          $("mm").value,
 
-      if(d) s.d=d;
+        staff_id:
+          Number(
+            $("staffSelect").value
+          )
 
-      if(m) s.m=m;
+      };
 
-      await putSample(s);
+      const { error } =
+        await supabaseClient
+          .from("design_sample")
+          .update(updateData)
+          .eq("id", cur)
+          .eq(
+            "store_id",
+            currentStaff.store_id
+          );
 
-    }else{
+      if(error){
 
-      if(!d){
+        throw error;
+
+      }
+
+    }
+
+    // =========================
+    // 新規登録の場合
+    // =========================
+
+    else{
+
+      const designFile =
+        $("df").files[0];
+
+      const productFile =
+        $("mf").files[0];
+
+      if(!designFile){
 
         alert(
           "デザイン写真を入れてね"
         );
 
-        status.textContent="";
+        status.textContent = "";
 
         return;
 
       }
 
-      const s={
+      // まずサンプルを作成
+      const { data, error } =
+        await supabaseClient
+          .from("design_sample")
+          .insert({
 
-        id:Date.now(),
+            name: name,
 
-        c:co,
+            course: String(co),
 
-        name:name,
+            used_products:
+              $("ms").value,
 
-        d:d,
+            memo:
+              $("mm").value,
 
-        m:m,
+            staff_id:
+              Number(
+                $("staffSelect").value
+              ),
 
-        ms:$("ms").value,
+            store_id:
+              currentStaff.store_id
 
-        mm:$("mm").value,
+          })
+          .select()
+          .single();
 
-        staff:
-          Number(
-            $("staffSelect").value
-          ),
+      if(error){
 
-        date:
-          new Date()
-            .toLocaleDateString(
-              "ja-JP"
-            ),
+        throw error;
 
-        t:Date.now()
+      }
 
-      };
+      const sampleId = data.id;
 
-      await putSample(s);
+      // =========================
+      // デザイン写真
+      // =========================
 
-      S.push(s);
+      const designExt =
+        designFile.name
+          .split(".")
+          .pop();
+
+      const designPath =
+        `${currentStaff.store_id}/${sampleId}/design.${designExt}`;
+
+      const {
+        error: designUploadError
+      } =
+        await supabaseClient
+          .storage
+          .from("nail-image")
+          .upload(
+            designPath,
+            designFile,
+            {
+              upsert:true
+            }
+          );
+
+      if(designUploadError){
+
+        throw designUploadError;
+
+      }
+
+      // =========================
+      // 商品写真
+      // =========================
+
+      let productPath = null;
+
+      if(productFile){
+
+        const productExt =
+          productFile.name
+            .split(".")
+            .pop();
+
+        productPath =
+          `${currentStaff.store_id}/${sampleId}/product.${productExt}`;
+
+        const {
+          error: productUploadError
+        } =
+          await supabaseClient
+            .storage
+            .from("nail-image")
+            .upload(
+              productPath,
+              productFile,
+              {
+                upsert:true
+              }
+            );
+
+        if(productUploadError){
+
+          throw productUploadError;
+
+        }
+
+      }
+
+      // =========================
+      // 画像パスを保存
+      // =========================
+
+      const {
+        error: updateError
+      } =
+        await supabaseClient
+          .from("design_sample")
+          .update({
+
+            design_image:
+              designPath,
+
+            product_image:
+              productPath
+
+          })
+          .eq("id", sampleId)
+          .eq(
+            "store_id",
+            currentStaff.store_id
+          );
+
+      if(updateError){
+
+        throw updateError;
+
+      }
 
     }
 
+    // =========================
+    // 完了
+    // =========================
 
     closeM("form");
 
-    status.textContent="";
+    status.textContent = "";
 
     await reload();
 
@@ -1970,12 +2099,16 @@ async function save(){
 
   }catch(e){
 
-    console.error(e);
+    console.error(
+      "保存エラー:",
+      e
+    );
 
-    status.textContent="";
+    status.textContent = "";
 
     alert(
-      "保存できませんでした。\nもう一度試してみてね。"
+      "保存できませんでした。\n" +
+      "もう一度試してみてね。"
     );
 
   }
