@@ -963,33 +963,86 @@ async function getAllSamples(){
 
   }
 
-  return (data || []).map(s => ({
+  const samples = [];
 
-    id:s.id,
+  for(const s of (data || [])){
 
-    c:Number(s.course),
+    let designUrl = "";
+    let productUrl = "";
 
-    name:s.name,
+    // デザイン画像
+    if(s.design_image){
 
-    d:s.design_image,
+      const { data:designData } =
+        await supabaseClient
+          .storage
+          .from("nail-image")
+          .createSignedUrl(
+            s.design_image,
+            3600
+          );
 
-    m:s.product_image,
+      if(designData){
 
-    ms:s.used_products || "",
+        designUrl =
+          designData.signedUrl;
 
-    mm:s.memo || "",
+      }
 
-    staff:s.staff_id,
+    }
 
-    date:
-      new Date(s.created_at)
-        .toLocaleDateString("ja-JP"),
+    // 商品画像
+    if(s.product_image){
 
-    t:
-      new Date(s.created_at)
-        .getTime()
+      const { data:productData } =
+        await supabaseClient
+          .storage
+          .from("nail-image")
+          .createSignedUrl(
+            s.product_image,
+            3600
+          );
 
-  }));
+      if(productData){
+
+        productUrl =
+          productData.signedUrl;
+
+      }
+
+    }
+
+    samples.push({
+
+      id:s.id,
+
+      c:Number(s.course),
+
+      name:s.name,
+
+      d:designUrl,
+
+      m:productUrl,
+
+      ms:s.used_products || "",
+
+      mm:s.memo || "",
+
+      staff:s.staff_id,
+
+      date:
+        new Date(s.created_at)
+          .toLocaleDateString("ja-JP"),
+
+      t:
+        new Date(s.created_at)
+          .getTime()
+
+    });
+
+  }
+
+  return samples;
 
 }
 
