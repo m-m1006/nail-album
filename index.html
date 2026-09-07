@@ -931,40 +931,67 @@ function openDB(){
 }
 
 
-function getAllSamples(){
+async function getAllSamples(){
 
-  return new Promise((resolve,reject)=>{
+  if(!currentStaff){
 
-    const tx =
-      db.transaction(
-        STORE,
-        "readonly"
-      );
+    console.log("スタッフ情報がまだありません");
 
-    const store =
-      tx.objectStore(STORE);
+    return [];
 
-    const request =
-      store.getAll();
+  }
 
-    request.onsuccess=()=>{
+  const {
+    data,
+    error
+  } = await supabaseClient
+    .from("design_sample")
+    .select("*")
+    .eq("store_id", currentStaff.store_id)
+    .order("created_at", {
+      ascending:false
+    });
 
-      resolve(
-        request.result || []
-      );
+  if(error){
 
-    };
+    console.error(
+      "サンプル取得エラー:",
+      error
+    );
 
-    request.onerror=()=>{
+    throw error;
 
-      reject(request.error);
+  }
 
-    };
+  return (data || []).map(s => ({
 
-  });
+    id:s.id,
+
+    c:Number(s.course),
+
+    name:s.name,
+
+    d:s.design_image,
+
+    m:s.product_image,
+
+    ms:s.used_products || "",
+
+    mm:s.memo || "",
+
+    staff:s.staff_id,
+
+    date:
+      new Date(s.created_at)
+        .toLocaleDateString("ja-JP"),
+
+    t:
+      new Date(s.created_at)
+        .getTime()
+
+  }));
 
 }
-
 
 function putSample(sample){
 
