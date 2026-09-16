@@ -660,76 +660,153 @@ let staffs = JSON.parse(
 );
 
 
-function saveStaffs(){
+/* =====================================================
+   スタッフ
+===================================================== */
 
-  localStorage.setItem(
-    "nail_staffs",
-    JSON.stringify(staffs)
+let staffs = [];
+
+
+/* Supabaseから同じ店舗のスタッフを取得 */
+async function loadStaffs(){
+
+  if(!currentStaff){
+    console.log("現在のスタッフ情報がありません");
+    staffs = [];
+    return [];
+  }
+
+  const { data, error } = await supabaseClient
+    .from("staff")
+    .select("id, name, role, user_id")
+    .eq("store_id", currentStaff.store_id)
+    .order("id", { ascending:true });
+
+  if(error){
+
+    console.error(
+      "スタッフ取得エラー:",
+      error
+    );
+
+    staffs = [];
+    return [];
+
+  }
+
+  staffs = data || [];
+
+  console.log(
+    "店舗スタッフ:",
+    staffs
   );
+
+  return staffs;
 
 }
 
 
+/* スタッフIDから名前を取得 */
 function staffName(id){
 
   const s =
-    staffs.find(x=>x.id==id);
+    staffs.find(
+      x => x.id == id
+    );
 
   return s
     ? s.name
-    : "自分";
+    : "不明";
 
 }
 
 
-function openStaffManager(){
+/* スタッフ管理を開く */
+async function openStaffManager(){
+
+  await loadStaffs();
 
   renderStaffManager();
 
-  $("staffManager").classList.add("open");
+  $("staffManager")
+    .classList
+    .add("open");
 
 }
 
 
+/* スタッフ一覧を表示 */
 function renderStaffManager(){
 
   $("staffList").innerHTML =
-    staffs.map(s=>`
 
-      <div class="staff-row">
+    staffs.length
 
-        <input
-          value="${esc(s.name)}"
-          onchange="renameStaff(${s.id},this.value)"
-        >
+      ? staffs.map(s => `
 
-        <button
-          onclick="renameStaff(${s.id},this.previousElementSibling.value)"
-        >
-          保存
-        </button>
+        <div class="staff-row">
 
-        <button
-          class="delete-staff"
-          onclick="removeStaff(${s.id})"
-        >
-          削除
-        </button>
+          <input
+            value="${esc(s.name)}"
+            onchange="renameStaff(${s.id},this.value)"
+          >
 
-      </div>
+          <button
+            onclick="
+              renameStaff(
+                ${s.id},
+                this.previousElementSibling.value
+              )
+            "
+          >
+            保存
+          </button>
 
-    `).join("");
+          ${
+            s.role === "owner"
+
+              ? `
+                <span
+                  class="small"
+                  style="white-space:nowrap;"
+                >
+                  管理者
+                </span>
+              `
+
+              : `
+                <button
+                  class="delete-staff"
+                  onclick="removeStaff(${s.id})"
+                >
+                  削除
+                </button>
+              `
+          }
+
+        </div>
+
+      `).join("")
+
+      : `
+        <div class="empty">
+          スタッフがいません
+        </div>
+      `;
 
 }
 
 
-function renameStaff(id,name){
+/* スタッフ名変更 */
+async function renameStaff(id,name){
 
-  name=name.trim();
+  name = name.trim();
 
   if(!name){
 
     alert("スタッフ名を入力してね");
+
+    await loadStaffs();
 
     renderStaffManager();
 
@@ -740,95 +817,63 @@ function renameStaff(id,name){
   const duplicate =
     staffs.some(
       s =>
-        s.id!==id &&
-        s.name===name
+        s.id != id &&
+        s.name === name
     );
 
   if(duplicate){
 
     alert("同じ名前のスタッフがいます");
 
-    renderStaffManager();
+    return;
+
+  }
+
+  const { error } = await supabaseClient
+    .from("staff")
+    .update({
+      name:name
+    })
+    .eq("id",id)
+    .eq("store_id",currentStaff.store_id);
+
+  if(error){
+
+    console.error(
+      "スタッフ名変更エラー:",
+      error
+    );
+
+    alert("スタッフ名を変更できませんでした");
 
     return;
 
   }
 
-  const s =
-    staffs.find(x=>x.id===id);
-
-  if(s){
-
-    s.name=name;
-
-  }
-
-  saveStaffs();
+  await loadStaffs();
 
   renderStaffManager();
 
 }
 
 
-function addStaff(){
-
-  const input=$("newStaff");
-
-  const name=input.value.trim();
-
-  if(!name){
-
-    alert("スタッフ名を入力してね");
-
-    return;
-
-  }
-
-  if(
-    staffs.some(
-      s=>s.name===name
-    )
-  ){
-
-    alert("同じ名前のスタッフがいます");
-
-    return;
-
-  }
-
-  const id =
-    staffs.length
-      ? Math.max(...staffs.map(s=>s.id))+1
-      : 1;
-
-  staffs.push({
-    id,
-    name
-  });
-
-  saveStaffs();
-
-  input.value="";
-
-  renderStaffManager();
-
-}
-
-
-function removeStaff(id){
-
-  if(staffs.length<=1){
-
-    alert("スタッフは最低1人必要です");
-
-    return;
-
-  }
+/* スタッフ削除 */
+async function removeStaff(id){
 
   const s =
-    staffs.find(x=>x.id===id);
+    staffs.find(
+      x => x.id == id
+    );
 
   if(!s) return;
+
+  if(s.role === "owner"){
+
+    alert("管理者は削除できません");
+
+    return;
+
+  }
 
   if(
     !confirm(
@@ -836,12 +881,29 @@ function removeStaff(id){
     )
   ) return;
 
-  staffs =
-    staffs.filter(
-      x=>x.id!==id
+
+  const { error } = await supabaseClient
+    .from("staff")
+    .delete()
+    .eq("id",id)
+    .eq("store_id",currentStaff.store_id);
+
+  if(error){
+
+    console.error(
+      "スタッフ削除エラー:",
+      error
     );
 
-  saveStaffs();
+    alert(
+      "スタッフを削除できませんでした"
+    );
+
+    return;
+
+  }
+
+  await loadStaffs();
 
   renderStaffManager();
 
