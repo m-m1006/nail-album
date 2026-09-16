@@ -2373,32 +2373,60 @@ function editS(){
 ===================================================== */
 
 async function del(){
-
-  if(
-    !confirm(
-      "このサンプルを削除する？"
-    )
-  ) return;
+  if(!confirm("このサンプルを削除する？")) return;
 
   try{
+    if(!currentStaff){
+      await loadCurrentStaff();
+    }
 
-    await deleteSample(cur);
+    if(!currentStaff){
+      throw new Error("ログイン中のスタッフ情報がありません");
+    }
 
-    S =
-      S.filter(
-        x=>x.id!=cur
-      );
+    // 削除するサンプルの画像パスを取得
+    const { data: row, error: fetchError } = await supabaseClient
+      .from("design_sample")
+      .select("id, design_image, product_image")
+      .eq("id", cur)
+      .eq("store_id", currentStaff.store_id)
+      .single();
 
+    if(fetchError) throw fetchError;
+
+    // まずデータベースから削除
+    const { error: deleteError } = await supabaseClient
+      .from("design_sample")
+      .delete()
+      .eq("id", cur)
+      .eq("store_id", currentStaff.store_id);
+
+    if(deleteError) throw deleteError;
+
+    // Storageの画像も削除
+    const paths = [];
+
+    if(row.design_image) paths.push(row.design_image);
+    if(row.product_image) paths.push(row.product_image);
+
+    if(paths.length){
+      const { error: storageError } = await supabaseClient
+        .storage
+        .from("nail-image")
+        .remove(paths);
+
+      if(storageError) {
+        console.error("画像削除エラー:", storageError);
+      }
+    }
+
+    S = S.filter(x => x.id != cur);
     list(co);
 
   }catch(e){
-
-    alert(
-      "削除できませんでした"
-    );
-
+    console.error("削除エラー:", e);
+    alert("削除できませんでした");
   }
-
 }
 
 
