@@ -2475,6 +2475,8 @@ $("bl").onclick =
 
     await openDB();
 
+    await loadCurrentStaff();
+
     await migrateOldData();
 
     await reload();
