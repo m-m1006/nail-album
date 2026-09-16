@@ -2505,125 +2505,66 @@ async function reload(){
 
 
 /* =====================================================
-   起動
+   起動・ログイン
 ===================================================== */
 
-$("hp").onclick =
-  chooser;
+const loginScreen =
+  document.getElementById("loginScreen");
 
-$("lp").onclick =
-  add;
+const appScreen =
+  document.querySelector(".app");
 
-$("bh").onclick =
-  ()=>{
+const loginButton =
+  document.getElementById("loginButton");
 
-    home();
+const loginEmail =
+  document.getElementById("loginEmail");
 
-    go("home");
+const loginPassword =
+  document.getElementById("loginPassword");
 
-  };
-
-$("bl").onclick =
-  ()=>{
-
-    list(co);
-
-  };
+const loginMessage =
+  document.getElementById("loginMessage");
 
 
-(async function(){
+/* -------------------------
+   画面切り替え
+------------------------- */
 
-  try{
+function showApp(){
 
-    await openDB();
+  loginScreen.style.display = "none";
+  appScreen.style.display = "";
 
-    await loadCurrentStaff();
+}
 
-    await migrateOldData();
 
-    await reload();
+function showLogin(){
 
-    home();
+  loginScreen.style.display = "block";
+  appScreen.style.display = "none";
 
-  }catch(e){
+}
 
-    console.error(e);
 
-    alert(
-      "アプリの読み込みに失敗しました。ページを更新してみてね。"
-    );
+/* -------------------------
+   ログイン中スタッフ取得
+------------------------- */
 
-  }
-
-})();
-
-  // ===== Supabaseログイン =====
-  const loginScreen = document.getElementById("loginScreen");
-  const appScreen = document.querySelector(".app");
-  const loginButton = document.getElementById("loginButton");
-  const loginEmail = document.getElementById("loginEmail");
-  const loginPassword = document.getElementById("loginPassword");
-  const loginMessage = document.getElementById("loginMessage");
-
-  function showApp() {
-    loginScreen.style.display = "none";
-    appScreen.style.display = "";
-  }
-
-  function showLogin() {
-    loginScreen.style.display = "block";
-    appScreen.style.display = "none";
-  }
-
-  async function checkLogin() {
-    const { data } = await supabaseClient.auth.getSession();
-
-    if (data.session) {
-      showApp();
-    } else {
-      showLogin();
-    }
-  }
-
-  loginButton.addEventListener("click", async () => {
-    const email = loginEmail.value.trim();
-    const password = loginPassword.value;
-
-    if (!email || !password) {
-      loginMessage.textContent = "メールアドレスとパスワードを入力してください";
-      return;
-    }
-
-    loginMessage.textContent = "ログイン中…";
-
-    const { error } = await supabaseClient.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
-
-    if (error) {
-      loginMessage.textContent = "ログインできませんでした";
-      console.error(error);
-      return;
-    }
-
-    loginMessage.textContent = "";
-    showApp();
-  });
-
-  checkLogin();
-
- // ===== ログイン中のスタッフ情報を取得 =====
-async function loadCurrentStaff() {
+async function loadCurrentStaff(){
 
   const {
     data: { user },
     error: userError
-  } = await supabaseClient.auth.getUser();
+  } =
+    await supabaseClient.auth.getUser();
 
-  if (userError || !user) {
 
-    console.log("ログインユーザーが見つかりません");
+  if(userError || !user){
+
+    console.log(
+      "ログインユーザーが見つかりません"
+    );
 
     currentUser = null;
     currentStaff = null;
@@ -2632,18 +2573,27 @@ async function loadCurrentStaff() {
 
   }
 
+
   currentUser = user;
+
 
   const {
     data: staff,
     error: staffError
-  } = await supabaseClient
-    .from("staff")
-    .select("id, name, store_id")
-    .eq("user_id", user.id)
-    .single();
+  } =
+    await supabaseClient
+      .from("staff")
+      .select(
+        "id, name, store_id, role"
+      )
+      .eq(
+        "user_id",
+        user.id
+      )
+      .single();
 
-  if (staffError || !staff) {
+
+  if(staffError || !staff){
 
     console.error(
       "スタッフ情報の取得に失敗:",
@@ -2656,59 +2606,294 @@ async function loadCurrentStaff() {
 
   }
 
+
   currentStaff = staff;
 
-  console.log("ログインユーザー:", currentUser);
-  console.log("現在のスタッフ:", currentStaff);
-  console.log("スタッフ名:", currentStaff.name);
-  console.log("店舗ID:", currentStaff.store_id);
 
-// ログイン情報を画面に表示
-const oldLoginInfo = document.getElementById("loginInfo");
+  console.log(
+    "ログインユーザー:",
+    currentUser
+  );
 
-if (oldLoginInfo) {
-  oldLoginInfo.remove();
-}
+  console.log(
+    "現在のスタッフ:",
+    currentStaff
+  );
 
-const loginInfo = document.createElement("div");
 
-loginInfo.id = "loginInfo";
+  /* -------------------------
+     ログイン情報表示
+  ------------------------- */
 
-loginInfo.style.cssText = `
-  padding:10px 16px;
-  font-size:12px;
-  color:#777;
-  text-align:right;
-  background:#fff;
-`;
+  const oldLoginInfo =
+    document.getElementById(
+      "loginInfo"
+    );
 
-loginInfo.innerHTML = `
-  👤 ${esc(currentStaff.name)}
-  ・店舗ID ${currentStaff.store_id}
-`;
+  if(oldLoginInfo){
 
-document.querySelector(".app").prepend(loginInfo);
+    oldLoginInfo.remove();
 
-loginInfo.style.cssText = `
-  padding:10px 16px;
-  font-size:12px;
-  color:#777;
-  text-align:right;
-  background:#fff;
-`;
+  }
 
-loginInfo.innerHTML = `
-  👤 ${esc(currentStaff.name)}
-  ・店舗ID ${currentStaff.store_id}
-`;
 
-document.querySelector(".app").prepend(loginInfo);
+  const loginInfo =
+    document.createElement("div");
+
+  loginInfo.id =
+    "loginInfo";
+
+  loginInfo.style.cssText = `
+    padding:10px 16px;
+    font-size:12px;
+    color:#777;
+    text-align:right;
+    background:#fff;
+  `;
+
+  loginInfo.innerHTML = `
+    👤 ${esc(currentStaff.name)}
+    ・店舗ID ${currentStaff.store_id}
+  `;
+
+  appScreen.prepend(
+    loginInfo
+  );
+
 
   return currentStaff;
 
 }
 
-</script>
+
+/* -------------------------
+   アプリ起動
+------------------------- */
+
+async function startApp(){
+
+  try{
+
+    await openDB();
+
+    const staff =
+      await loadCurrentStaff();
+
+
+    if(!staff){
+
+      showLogin();
+
+      return;
+
+    }
+
+
+    await reload();
+
+    home();
+
+    showApp();
+
+
+  }catch(e){
+
+    console.error(
+      "アプリ起動エラー:",
+      e
+    );
+
+    alert(
+      "アプリの読み込みに失敗しました。ページを更新してみてね。"
+    );
+
+  }
+
+}
+
+
+/* -------------------------
+   ログイン確認
+------------------------- */
+
+async function checkLogin(){
+
+  try{
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .auth
+        .getSession();
+
+
+    if(error){
+
+      console.error(
+        "ログイン確認エラー:",
+        error
+      );
+
+      showLogin();
+
+      return;
+
+    }
+
+
+    if(data.session){
+
+      await startApp();
+
+    }else{
+
+      showLogin();
+
+    }
+
+
+  }catch(e){
+
+    console.error(
+      "ログイン確認エラー:",
+      e
+    );
+
+    showLogin();
+
+  }
+
+}
+
+
+/* -------------------------
+   ログインボタン
+------------------------- */
+
+loginButton.addEventListener(
+  "click",
+  async function(){
+
+    const email =
+      loginEmail.value.trim();
+
+    const password =
+      loginPassword.value;
+
+
+    if(!email || !password){
+
+      loginMessage.textContent =
+        "メールアドレスとパスワードを入力してください";
+
+      return;
+
+    }
+
+
+    loginMessage.textContent =
+      "ログイン中…";
+
+    loginButton.disabled = true;
+
+
+    try{
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .auth
+          .signInWithPassword({
+
+            email: email,
+            password: password
+
+          });
+
+
+      if(error){
+
+        console.error(
+          "ログインエラー:",
+          error
+        );
+
+        loginMessage.textContent =
+          "ログインできませんでした";
+
+        loginButton.disabled =
+          false;
+
+        return;
+
+      }
+
+
+      loginMessage.textContent =
+        "ログインしました！";
+
+
+      await startApp();
+
+
+    }catch(e){
+
+      console.error(
+        "ログインエラー:",
+        e
+      );
+
+      loginMessage.textContent =
+        "ログインできませんでした";
+
+    }
+
+
+    loginButton.disabled =
+      false;
+
+  }
+);
+
+
+/* -------------------------
+   ボタンなど
+------------------------- */
+
+$("hp").onclick =
+  chooser;
+
+
+$("lp").onclick =
+  add;
+
+
+$("bh").onclick =
+  ()=>{
+
+    home();
+
+    go("home");
+
+  };
+
+
+$("bl").onclick =
+  ()=>{
+
+    list(co);
+
+  };
+
+
+/* -------------------------
+   最初にログイン確認
+------------------------- */
+
+checkLogin();</script>
 
 </div>
 
