@@ -695,10 +695,10 @@ async function createInviteCode(){
       .single();
 
     if(error){
-      console.error(error);
-      alert("招待コードを発行できませんでした");
-      return;
-    }
+  console.error(error);
+  alert("エラー：" + error.message);
+  return;
+}
 
     document.getElementById("inviteCode").textContent =
       data.invite_code;
