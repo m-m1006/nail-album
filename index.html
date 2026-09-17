@@ -2720,6 +2720,107 @@ function showSignup(){
 
 }
 
+async function signupStaff(){
+
+  const name =
+    document.getElementById("signupName").value.trim();
+
+  const email =
+    document.getElementById("signupEmail").value.trim();
+
+  const password =
+    document.getElementById("signupPassword").value;
+
+  const inviteCode =
+    document.getElementById("signupInvite").value.trim().toUpperCase();
+
+  const message =
+    document.getElementById("signupMessage");
+
+  if(!name || !email || !password || !inviteCode){
+    message.textContent =
+      "すべて入力してください";
+    return;
+  }
+
+  if(password.length < 6){
+    message.textContent =
+      "パスワードは6文字以上にしてください";
+    return;
+  }
+
+  message.textContent =
+    "登録しています…";
+
+  try{
+
+    // Supabaseアカウント作成
+    const {
+      data,
+      error
+    } = await supabaseClient.auth.signUp({
+      email: email,
+      password: password
+    });
+
+    if(error){
+      console.error(error);
+      message.textContent =
+        "登録できませんでした：" + error.message;
+      return;
+    }
+
+    // ログイン状態を取得
+    const {
+      data: sessionData
+    } = await supabaseClient.auth.getSession();
+
+    if(!sessionData.session){
+      message.textContent =
+        "登録しました。メールを確認してからログインしてください。";
+      return;
+    }
+
+    // 招待コードから店舗スタッフ登録
+    const {
+      data: staff,
+      error: joinError
+    } = await supabaseClient.rpc(
+      "join_store_by_invite",
+      {
+        p_invite_code: inviteCode,
+        p_name: name
+      }
+    );
+
+    if(joinError){
+      console.error(joinError);
+      message.textContent =
+        "店舗登録に失敗しました：" +
+        joinError.message;
+      return;
+    }
+
+    message.textContent =
+      "スタッフ登録が完了しました！";
+
+    // 少し待ってログイン画面へ
+    setTimeout(() => {
+      showLogin();
+      loginEmail.value = email;
+      loginPassword.value = password;
+    }, 1000);
+
+  }catch(e){
+
+    console.error(e);
+
+    message.textContent =
+      "登録中にエラーが発生しました";
+
+  }
+
+}
 
 /* -------------------------
    ログイン中スタッフ取得
