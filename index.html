@@ -2772,6 +2772,92 @@ function showJoinStore(){
 
 }
 
+async function joinStore(){
+
+  const name =
+    document.getElementById("joinName").value.trim();
+
+  const inviteCode =
+    document.getElementById("joinInvite").value.trim().toUpperCase();
+
+  const message =
+    document.getElementById("joinMessage");
+
+  if(!name || !inviteCode){
+
+    message.textContent =
+      "スタッフ名と招待コードを入力してください";
+
+    return;
+  }
+
+  message.textContent =
+    "店舗に参加しています…";
+
+  try{
+
+    const {
+      data: staff,
+      error
+    } = await supabaseClient.rpc(
+      "join_store_by_invite",
+      {
+        p_invite_code: inviteCode,
+        p_name: name
+      }
+    );
+
+    if(error){
+
+      console.error(
+        "店舗参加エラー:",
+        error
+      );
+
+      message.textContent =
+        "店舗に参加できませんでした：" +
+        error.message;
+
+      return;
+    }
+
+    if(!staff){
+
+      message.textContent =
+        "スタッフ登録を確認できませんでした";
+
+      return;
+    }
+
+    message.textContent =
+      "店舗への参加が完了しました！";
+
+    currentStaff = staff;
+
+    setTimeout(async () => {
+
+      await reload();
+
+      home();
+
+      showApp();
+
+    }, 500);
+
+  }catch(e){
+
+    console.error(
+      "店舗参加エラー:",
+      e
+    );
+
+    message.textContent =
+      "店舗参加中にエラーが発生しました";
+
+  }
+
+}
+
 async function signupStaff(){
 
   const name =
