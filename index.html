@@ -2958,11 +2958,13 @@ async function startApp(){
 
     if(!staff){
 
-      showLogin();
+  alert("このアカウントはまだ店舗登録されていません");
 
-      return;
+  showLogin();
 
-    }
+  return;
+
+}
 
 
     await reload();
