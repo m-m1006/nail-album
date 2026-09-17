@@ -593,27 +593,43 @@ textarea{
     <h2>👤 スタッフを管理</h2>
 
     <div class="small">
-      スタッフ名を追加・変更・削除できます。
+      同じ店舗のスタッフを管理できます。
     </div>
 
     <div id="staffList"></div>
 
     <h3 style="margin-top:25px">
-      新しいスタッフを追加
+      スタッフを招待
     </h3>
 
-    <input
-      id="newStaff"
-      placeholder="例：田中"
-    >
+    <div class="small">
+      招待コードを発行して、参加するスタッフに伝えてください。
+    </div>
 
     <button
       class="primary"
       style="width:100%;margin-top:10px"
-      onclick="addStaff()"
+      onclick="createInviteCode()"
     >
-      ＋ スタッフを追加
+      ＋ 招待コードを発行
     </button>
+
+    <div
+      id="inviteCodeArea"
+      style="display:none;text-align:center;margin-top:15px;padding:15px;background:#f7f7f7;border-radius:12px"
+    >
+      <div class="small">招待コード</div>
+
+      <div
+        id="inviteCode"
+        style="font-size:28px;font-weight:bold;letter-spacing:4px;margin:8px 0"
+      ></div>
+
+      <div
+        id="inviteExpires"
+        class="small"
+      ></div>
+    </div>
 
     <button
       class="secondary choice"
@@ -629,6 +645,78 @@ textarea{
 
 
 <script>
+
+/* =====================================================
+   招待コード
+===================================================== */
+
+async function createInviteCode(){
+
+  try{
+
+    if(!currentStaff){
+      await loadCurrentStaff();
+    }
+
+    if(!currentStaff){
+      alert("スタッフ情報を取得できませんでした");
+      return;
+    }
+
+    if(currentStaff.role !== "owner"){
+      alert("招待コードを発行できるのはオーナーのみです");
+      return;
+    }
+
+    // 6桁のランダムコード
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const random = new Uint32Array(6);
+    crypto.getRandomValues(random);
+
+    let code = "";
+
+    for(let i = 0; i < 6; i++){
+      code += chars[random[i] % chars.length];
+    }
+
+    // 7日間有効
+    const expiresAt = new Date(
+      Date.now() + 7 * 24 * 60 * 60 * 1000
+    ).toISOString();
+
+    const { data, error } = await supabaseClient
+      .from("store_invites")
+      .insert({
+        store_id: currentStaff.store_id,
+        invite_code: code,
+        expires_at: expiresAt
+      })
+      .select()
+      .single();
+
+    if(error){
+      console.error(error);
+      alert("招待コードを発行できませんでした");
+      return;
+    }
+
+    document.getElementById("inviteCode").textContent =
+      data.invite_code;
+
+    document.getElementById("inviteExpires").textContent =
+      "有効期限：" +
+      new Date(data.expires_at).toLocaleDateString("ja-JP");
+
+    document.getElementById("inviteCodeArea").style.display = "block";
+
+  }catch(e){
+
+    console.error("招待コード発行エラー:", e);
+    alert("招待コードを発行できませんでした");
+
+  }
+
+}
 
 /* =====================================================
    基本設定
