@@ -2699,7 +2699,24 @@ function showApp(){
 function showLogin(){
 
   loginScreen.style.display = "block";
+
+  const signupScreen =
+    document.getElementById("signupScreen");
+
+  signupScreen.style.display = "none";
+
   appScreen.style.display = "none";
+
+}
+
+function showSignup(){
+
+  loginScreen.style.display = "none";
+
+  const signupScreen =
+    document.getElementById("signupScreen");
+
+  signupScreen.style.display = "block";
 
 }
 
