@@ -366,15 +366,97 @@ textarea{
 <body>
 
 <div id="loginScreen">
+
   <h1>💅 Nail Album</h1>
+
   <p>スタッフログイン</p>
 
-  <input id="loginEmail" type="email" placeholder="メールアドレス">
-  <input id="loginPassword" type="password" placeholder="パスワード">
+  <input
+    id="loginEmail"
+    type="email"
+    placeholder="メールアドレス"
+  >
 
-  <button id="loginButton">ログイン</button>
+  <input
+    id="loginPassword"
+    type="password"
+    placeholder="パスワード"
+  >
+
+  <button
+    id="loginButton"
+    class="primary"
+    style="width:100%;margin-top:10px"
+  >
+    ログイン
+  </button>
+
+  <button
+    type="button"
+    class="secondary"
+    style="width:100%;margin-top:10px"
+    onclick="showSignup()"
+  >
+    初めて利用する方はこちら
+  </button>
 
   <p id="loginMessage"></p>
+
+</div>
+
+
+<!-- スタッフ登録画面 -->
+<div id="signupScreen" style="display:none">
+
+  <h1>💅 Nail Album</h1>
+
+  <p>スタッフ登録</p>
+
+  <input
+    id="signupName"
+    type="text"
+    placeholder="スタッフ名"
+  >
+
+  <input
+    id="signupEmail"
+    type="email"
+    placeholder="メールアドレス"
+  >
+
+  <input
+    id="signupPassword"
+    type="password"
+    placeholder="パスワード"
+  >
+
+  <input
+    id="signupInvite"
+    type="text"
+    placeholder="店舗招待コード"
+    style="text-transform:uppercase"
+  >
+
+  <button
+    id="signupButton"
+    class="primary"
+    style="width:100%;margin-top:10px"
+    onclick="signupStaff()"
+  >
+    スタッフ登録
+  </button>
+
+  <button
+    type="button"
+    class="secondary"
+    style="width:100%;margin-top:10px"
+    onclick="showLogin()"
+  >
+    ログイン画面に戻る
+  </button>
+
+  <p id="signupMessage"></p>
+
 </div>
 
 <div class="app">
