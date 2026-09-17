@@ -442,7 +442,6 @@ textarea{
     class="primary"
     style="width:100%;margin-top:10px"
     onclick="signupStaff()"
-    alert("signupStaffの中まで来た！");
   >
     スタッフ登録
   </button>
@@ -457,6 +456,42 @@ textarea{
   </button>
 
   <p id="signupMessage"></p>
+
+</div>
+
+<!-- 店舗参加画面 -->
+<div id="joinStoreScreen" style="display:none">
+
+  <h1>💅 Nail Album</h1>
+
+  <p>店舗に参加</p>
+
+  <p class="small">
+    オーナーからもらった招待コードを入力してください。
+  </p>
+
+  <input
+    id="joinName"
+    type="text"
+    placeholder="スタッフ名"
+  >
+
+  <input
+    id="joinInvite"
+    type="text"
+    placeholder="店舗招待コード"
+    style="text-transform:uppercase"
+  >
+
+  <button
+    class="primary"
+    style="width:100%;margin-top:10px"
+    onclick="joinStore()"
+  >
+    店舗に参加する
+  </button>
+
+  <p id="joinMessage"></p>
 
 </div>
 
