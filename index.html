@@ -775,6 +775,8 @@ async function createInviteCode(){
     if(!currentStaff){
       await loadCurrentStaff();
     }
+    
+    console.log("現在のスタッフ:", currentStaff);
 
     if(!currentStaff){
       alert("スタッフ情報を取得できませんでした");
