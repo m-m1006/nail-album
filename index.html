@@ -2042,7 +2042,7 @@ function renderStaffSelect(selected){
 }
 
 
-function add(){
+async function add(){
 
   edit=0;
 
@@ -2083,7 +2083,9 @@ function add(){
   $("sn").value =
     cn(co)+next;
 
-  renderStaffSelect(
+  await loadStaffs();
+
+renderStaffSelect(
   currentStaff?.id
 );
 
