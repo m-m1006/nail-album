@@ -3227,7 +3227,7 @@ async function loadCurrentStaff(){
   );
 
 
-  /* -------------------------
+/* -------------------------
      ログイン情報表示
   ------------------------- */
 
@@ -3237,11 +3237,8 @@ async function loadCurrentStaff(){
     );
 
   if(oldLoginInfo){
-
     oldLoginInfo.remove();
-
   }
-
 
   const loginInfo =
     document.createElement("div");
@@ -3257,66 +3254,25 @@ async function loadCurrentStaff(){
     background:#fff;
   `;
 
+  const { data: storeData } =
+    await supabaseClient
+      .from("store")
+      .select("name")
+      .eq("id", currentStaff.store_id)
+      .single();
+
+  const storeName =
+    storeData?.name || "店舗名未設定";
+
   loginInfo.innerHTML = `
     👤 ${esc(currentStaff.name)}
-    ・店舗ID ${currentStaff.store_id}
+    ・${esc(storeName)}
   `;
 
   appScreen.prepend(
     loginInfo
   );
-
-
-  return currentStaff;
-
-}
-
-
-/* -------------------------
-   アプリ起動
-------------------------- */
-
-async function startApp(){
-
-  try{
-
-    await openDB();
-
-    const staff =
-      await loadCurrentStaff();
-
-    if(!staff){
-
-      showJoinStore();
-
-      return;
-
-    }
-
-    await loadStoreName();
-
-    await reload();
-
-    home();
-
-    showApp();
-
-  }catch(e){
-
-    console.error(
-      "アプリ起動エラー:",
-      e
-    );
-
-    alert(
-      "アプリの読み込みに失敗しました。ページを更新してみてね。"
-    );
-
-  }
-
-}
-
-
+  
 /* -------------------------
    ログイン確認
 ------------------------- */
@@ -3371,7 +3327,6 @@ async function checkLogin(){
   }
 
 }
-
 
 /* -------------------------
    ログインボタン
