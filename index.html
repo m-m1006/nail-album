@@ -2263,10 +2263,8 @@ async function save(){
             memo:
               $("mm").value,
 
-            staff_id:
-              Number(
-                $("staffSelect").value
-              ),
+staff_id:
+  currentStaff.id,
 
             store_id:
               currentStaff.store_id
