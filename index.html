@@ -2272,10 +2272,7 @@ async function save(){
 　　　　　　　　staff_id:
              currentStaff.id,
 
-            store_id:
-              currentStaff.store_id
-
-          })
+           staff_id: Number($("staffSelect").value),
           .select()
           .single();
 
