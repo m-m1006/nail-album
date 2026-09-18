@@ -2253,36 +2253,41 @@ async function save(){
 
       }
 
-      // まずサンプルを作成
-      const { data, error } =
-        await supabaseClient
-          .from("design_sample")
-          .insert({
+// まずサンプルを作成
+const { data, error } =
+  await supabaseClient
+    .from("design_sample")
+    .insert({
 
-            name: name,
+      name: name,
 
-            course: String(co),
+      course: String(co),
 
-            used_products:
-              $("ms").value,
+      used_products:
+        $("ms").value,
 
-            memo:
-              $("mm").value,
+      memo:
+        $("mm").value,
 
-　　　　　　　　staff_id:
-             currentStaff.id,
+      staff_id:
+        Number(
+          $("staffSelect").value
+        ),
 
-           staff_id: Number($("staffSelect").value),
-          .select()
-          .single();
+      store_id:
+        currentStaff.store_id
 
-      if(error){
+    })
+    .select()
+    .single();
 
-        throw error;
+if(error){
 
-      }
+  throw error;
 
-      const sampleId = data.id;
+}
+
+const sampleId = data.id;
 
       // =========================
       // デザイン写真
