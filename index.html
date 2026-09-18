@@ -499,7 +499,7 @@ textarea{
 
 <header>
   <b style="font-size:23px">💅 Nail Album</b>
-  <div class="small">デザインサンプル共有</div>
+  <div id="storeNameDisplay" class="small">デザインサンプル共有</div>
 </header>
 
 <main>
@@ -514,7 +514,7 @@ textarea{
 
   <div id="rows"></div>
 
-  <div class="manage">
+<div class="manage">
 
     <button
       class="secondary"
@@ -532,7 +532,16 @@ textarea{
       👤 スタッフを管理
     </button>
 
-  </div>
+    <button
+      id="storeSettingButton"
+      class="secondary"
+      style="width:100%"
+      onclick="openStoreSettings()"
+    >
+      🏪 店舗設定
+    </button>
+
+</div>
 
 </section>
 
@@ -1104,6 +1113,145 @@ async function removeStaff(id){
 
 }
 
+/* =====================================================
+   店舗設定
+===================================================== */
+
+async function loadStoreName(){
+
+  if(!currentStaff){
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("store")
+      .select("id, name")
+      .eq("id", currentStaff.store_id)
+      .single();
+
+  if(error){
+
+    console.error(
+      "店舗情報取得エラー:",
+      error
+    );
+
+    return;
+  }
+
+  const storeName =
+    data?.name || "店舗名未設定";
+
+  $("storeNameDisplay").textContent =
+    storeName;
+
+  $("storeNameInput").value =
+    storeName;
+}
+
+
+/* 店舗設定を開く */
+async function openStoreSettings(){
+
+  if(!currentStaff){
+    await loadCurrentStaff();
+  }
+
+  if(!currentStaff){
+    alert("スタッフ情報を取得できませんでした");
+    return;
+  }
+
+  if(currentStaff.role !== "owner"){
+
+    alert(
+      "店舗設定を変更できるのはオーナーのみです"
+    );
+
+    return;
+  }
+
+  await loadStoreName();
+
+  $("storeSettingMessage").textContent = "";
+
+  $("storeSettings")
+    .classList
+    .add("open");
+}
+
+
+/* 店舗名を保存 */
+async function saveStoreName(){
+
+  if(!currentStaff){
+    alert("スタッフ情報を取得できませんでした");
+    return;
+  }
+
+  if(currentStaff.role !== "owner"){
+
+    alert(
+      "店舗名を変更できるのはオーナーのみです"
+    );
+
+    return;
+  }
+
+  const name =
+    $("storeNameInput")
+      .value
+      .trim();
+
+  if(!name){
+
+    $("storeSettingMessage").textContent =
+      "店舗名を入力してください";
+
+    return;
+  }
+
+  $("storeSettingMessage").textContent =
+    "保存中…";
+
+  const { error } =
+    await supabaseClient
+      .from("store")
+      .update({
+        name:name
+      })
+      .eq(
+        "id",
+        currentStaff.store_id
+      );
+
+  if(error){
+
+    console.error(
+      "店舗名変更エラー:",
+      error
+    );
+
+    $("storeSettingMessage").textContent =
+      "店舗名を変更できませんでした";
+
+    return;
+  }
+
+  $("storeNameDisplay").textContent =
+    name;
+
+  $("storeSettingMessage").textContent =
+    "保存しました！";
+
+  setTimeout(() => {
+
+    closeM("storeSettings");
+
+  }, 500);
+
+}
 
 /* =====================================================
    データ
@@ -3098,22 +3246,21 @@ async function startApp(){
     const staff =
       await loadCurrentStaff();
 
+    if(!staff){
 
-if(!staff){
+      showJoinStore();
 
-  showJoinStore();
+      return;
 
-  return;
+    }
 
-}
-
+    await loadStoreName();
 
     await reload();
 
     home();
 
     showApp();
-
 
   }catch(e){
 
