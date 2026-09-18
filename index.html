@@ -711,7 +711,46 @@ textarea{
 
 </div>
 
+<!-- 店舗設定 -->
+<div id="storeSettings" class="modal">
 
+  <div class="sheet">
+
+    <h2>🏪 店舗設定</h2>
+
+    <label>店舗名</label>
+
+    <input
+      id="storeNameInput"
+      type="text"
+      placeholder="店舗名を入力"
+    >
+
+    <button
+      class="primary"
+      style="width:100%;margin-top:10px"
+      onclick="saveStoreName()"
+    >
+      保存
+    </button>
+
+    <button
+      class="secondary choice"
+      style="margin-top:10px"
+      onclick="closeM('storeSettings')"
+    >
+      閉じる
+    </button>
+
+    <div
+      id="storeSettingMessage"
+      class="status"
+    ></div>
+
+  </div>
+
+</div>
+  
 <!-- スタッフ管理 -->
 <div id="staffManager" class="modal">
 
