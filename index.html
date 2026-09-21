@@ -3267,6 +3267,51 @@ async function loadCurrentStaff(){
 
   return currentStaff;
 }
+
+/* -------------------------
+   アプリ起動
+------------------------- */
+
+async function startApp(){
+
+  try{
+
+    await openDB();
+
+    const staff =
+      await loadCurrentStaff();
+
+    if(!staff){
+
+      showJoinStore();
+
+      return;
+
+    }
+
+    await loadStoreName();
+
+    await reload();
+
+    home();
+
+    showApp();
+
+  }catch(e){
+
+    console.error(
+      "アプリ起動エラー:",
+      e
+    );
+
+    alert(
+      "アプリの起動に失敗しました：\n" +
+      (e.message || e)
+    );
+
+  }
+
+}
   
 /* -------------------------
    ログイン確認
