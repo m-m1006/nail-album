@@ -3157,7 +3157,7 @@ async function signupStaff(){
 /* -------------------------
    ログイン中スタッフ取得
 ------------------------- */
-
+  
 async function loadCurrentStaff(){
 
   const {
@@ -3165,7 +3165,6 @@ async function loadCurrentStaff(){
     error: userError
   } =
     await supabaseClient.auth.getUser();
-
 
   if(userError || !user){
 
@@ -3177,12 +3176,9 @@ async function loadCurrentStaff(){
     currentStaff = null;
 
     return null;
-
   }
 
-
   currentUser = user;
-
 
   const {
     data: staff,
@@ -3199,7 +3195,6 @@ async function loadCurrentStaff(){
       )
       .single();
 
-
   if(staffError || !staff){
 
     console.error(
@@ -3210,12 +3205,9 @@ async function loadCurrentStaff(){
     currentStaff = null;
 
     return null;
-
   }
 
-
   currentStaff = staff;
-
 
   console.log(
     "ログインユーザー:",
@@ -3227,11 +3219,8 @@ async function loadCurrentStaff(){
     currentStaff
   );
 
-  return currentStaff;
 
-}
-
-/* -------------------------
+  /* -------------------------
      ログイン情報表示
   ------------------------- */
 
@@ -3258,11 +3247,16 @@ async function loadCurrentStaff(){
     background:#fff;
   `;
 
-  const { data: storeData } =
+  const {
+    data: storeData
+  } =
     await supabaseClient
       .from("store")
       .select("name")
-      .eq("id", currentStaff.store_id)
+      .eq(
+        "id",
+        currentStaff.store_id
+      )
       .single();
 
   const storeName =
@@ -3276,6 +3270,9 @@ async function loadCurrentStaff(){
   appScreen.prepend(
     loginInfo
   );
+
+  return currentStaff;
+}
   
 /* -------------------------
    ログイン確認
