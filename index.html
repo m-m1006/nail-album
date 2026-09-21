@@ -525,12 +525,13 @@ textarea{
     </button>
 
     <button
-      class="secondary"
-      style="width:100%"
-      onclick="openStaffManager()"
-    >
-      👤 スタッフを管理
-    </button>
+  id="staffManageButton"
+  class="secondary"
+  style="width:100%"
+  onclick="openStaffManager()"
+>
+  👤 スタッフを管理
+</button>
 
     <button
       id="storeSettingButton"
@@ -3203,6 +3204,18 @@ async function loadCurrentStaff(){
 
   currentStaff = staff;
 
+  const staffManageButton =
+  document.getElementById("staffManageButton");
+
+if(staffManageButton){
+
+  staffManageButton.style.display =
+    currentStaff.role === "owner"
+      ? ""
+      : "none";
+
+}
+  
   console.log(
     "ログインユーザー:",
     currentUser
