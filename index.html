@@ -968,6 +968,14 @@ function staffName(id){
 /* スタッフ管理を開く */
 async function openStaffManager(){
 
+    if(!currentStaff || currentStaff.role !== "owner"){
+
+    alert("スタッフ管理は管理者のみ利用できます");
+
+    return;
+
+  }
+
   await loadStaffs();
 
   renderStaffManager();
