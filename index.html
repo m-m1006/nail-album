@@ -3072,21 +3072,37 @@ async function signupStaff(){
     document.getElementById("signupMessage");
 
   if(!name || !email || !password || !inviteCode){
+
     message.textContent =
       "すべて入力してください";
+
     return;
+
   }
 
   if(password.length < 6){
+
     message.textContent =
       "パスワードは6文字以上にしてください";
+
     return;
+
   }
 
   message.textContent =
     "登録しています…";
 
   try{
+
+    // 招待情報を一時保存
+    localStorage.setItem(
+      "pendingStaffJoin",
+      JSON.stringify({
+        name: name,
+        inviteCode: inviteCode
+      })
+    );
+
 
     // Supabaseアカウント作成
     const {
@@ -3097,25 +3113,36 @@ async function signupStaff(){
       password: password
     });
 
+
     if(error){
+
       console.error(error);
+
+      localStorage.removeItem(
+        "pendingStaffJoin"
+      );
+
       message.textContent =
-        "登録できませんでした：" + error.message;
+        "登録できませんでした：" +
+        error.message;
+
       return;
+
     }
 
-    // ログイン状態を取得
-    const {
-      data: sessionData
-    } = await supabaseClient.auth.getSession();
 
-    if(!sessionData.session){
+    // メール認証が必要な場合
+    if(!data.session){
+
       message.textContent =
         "登録しました。メールを確認してからログインしてください。";
+
       return;
+
     }
 
-    // 招待コードから店舗スタッフ登録
+
+    // メール認証不要で、そのままログイン状態になった場合
     const {
       data: staff,
       error: joinError
@@ -3127,23 +3154,41 @@ async function signupStaff(){
       }
     );
 
+
     if(joinError){
+
       console.error(joinError);
+
       message.textContent =
         "店舗登録に失敗しました：" +
         joinError.message;
+
       return;
+
     }
+
+
+    localStorage.removeItem(
+      "pendingStaffJoin"
+    );
+
 
     message.textContent =
       "スタッフ登録が完了しました！";
 
-    // 少し待ってログイン画面へ
+
     setTimeout(() => {
+
       showLogin();
-      loginEmail.value = email;
-      loginPassword.value = password;
-    }, 1000);
+
+      loginEmail.value =
+        email;
+
+      loginPassword.value =
+        password;
+
+    },1000);
+
 
   }catch(e){
 
@@ -3156,7 +3201,7 @@ async function signupStaff(){
 
 }
 
-  
+
 /* -------------------------
    ログイン中スタッフ取得
 ------------------------- */
