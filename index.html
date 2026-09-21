@@ -1182,9 +1182,6 @@ async function loadStoreName(){
   const storeName =
     data?.name || "店舗名未設定";
 
-  $("storeNameDisplay").textContent =
-    storeName;
-
   $("storeNameInput").value =
     storeName;
 }
@@ -1277,9 +1274,6 @@ async function saveStoreName(){
 
     return;
   }
-
-  $("storeNameDisplay").textContent =
-    name;
 
   $("storeSettingMessage").textContent =
     "保存しました！";
