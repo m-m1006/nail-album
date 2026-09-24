@@ -3055,7 +3055,6 @@ async function joinStore(){
 }
 
 async function signupStaff(){
-
   const name =
     document.getElementById("signupName").value.trim();
 
@@ -3066,139 +3065,58 @@ async function signupStaff(){
     document.getElementById("signupPassword").value;
 
   const inviteCode =
-    document.getElementById("signupInvite").value.trim().toUpperCase();
+    document.getElementById("signupInvite").value
+      .trim()
+      .toUpperCase();
 
   const message =
     document.getElementById("signupMessage");
 
   if(!name || !email || !password || !inviteCode){
-
     message.textContent =
       "すべて入力してください";
-
     return;
-
   }
 
   if(password.length < 6){
-
     message.textContent =
       "パスワードは6文字以上にしてください";
-
     return;
-
   }
 
-  message.textContent =
-    "登録しています…";
+  message.textContent = "登録しています…";
 
   try{
-
-    // 招待情報を一時保存
-    localStorage.setItem(
-      "pendingStaffJoin",
-      JSON.stringify({
-        name: name,
-        inviteCode: inviteCode
-      })
-    );
-
-
-    // Supabaseアカウント作成
-    const { data, error } = await supabaseClient.auth.signUp({
-  email: email,
-  password: password,
-  options: {
-    emailRedirectTo: "https://m-m1006.github.io/nail-album/"
-  }
-});
-
+    const { data, error } =
+      await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            staff_name: name,
+            invite_code: inviteCode
+          },
+          emailRedirectTo:
+            "https://m-m1006.github.io/nail-album/"
+        }
+      });
 
     if(error){
-
       console.error(error);
-
-      localStorage.removeItem(
-        "pendingStaffJoin"
-      );
-
       message.textContent =
         "登録できませんでした：" +
         error.message;
-
       return;
-
     }
-
-
-    // メール認証が必要な場合
-    if(!data.session){
-
-      message.textContent =
-        "登録しました。メールを確認してからログインしてください。";
-
-      return;
-
-    }
-
-
-    // メール認証不要で、そのままログイン状態になった場合
-    const {
-      data: staff,
-      error: joinError
-    } = await supabaseClient.rpc(
-      "join_store_by_invite",
-      {
-        p_invite_code: inviteCode,
-        p_name: name
-      }
-    );
-
-
-    if(joinError){
-
-      console.error(joinError);
-
-      message.textContent =
-        "店舗登録に失敗しました：" +
-        joinError.message;
-
-      return;
-
-    }
-
-
-    localStorage.removeItem(
-      "pendingStaffJoin"
-    );
-
 
     message.textContent =
-      "スタッフ登録が完了しました！";
-
-
-    setTimeout(() => {
-
-      showLogin();
-
-      loginEmail.value =
-        email;
-
-      loginPassword.value =
-        password;
-
-    },1000);
-
+      "登録しました。メールを確認してからログインしてください。";
 
   }catch(e){
-
     console.error(e);
-
     message.textContent =
       "登録中にエラーが発生しました";
-
   }
-
 }
 
 
