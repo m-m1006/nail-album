@@ -3105,13 +3105,13 @@ async function signupStaff(){
 
 
     // Supabaseアカウント作成
-    const {
-      data,
-      error
-    } = await supabaseClient.auth.signUp({
-      email: email,
-      password: password
-    });
+    const { data, error } = await supabaseClient.auth.signUp({
+  email: email,
+  password: password,
+  options: {
+    emailRedirectTo: "https://m-m1006.github.io/nail-album/"
+  }
+});
 
 
     if(error){
