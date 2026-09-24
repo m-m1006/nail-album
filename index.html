@@ -3271,32 +3271,46 @@ async function startApp(){
       return;
     }
 
-    // メール確認後、まだ店舗参加が済んでいない場合
-    const pending =
-      JSON.parse(
-        localStorage.getItem("pendingStaffJoin") || "null"
+    // 登録時にSupabaseアカウントへ保存した
+    // 名前＋招待コードを取得
+    const userResult =
+      await supabaseClient.auth.getUser();
+
+    const user = userResult.data.user;
+
+    const staffName =
+      user?.user_metadata?.staff_name;
+
+    const inviteCode =
+      user?.user_metadata?.invite_code;
+
+    // 登録時の情報があれば自動で店舗参加
+    if(staffName && inviteCode){
+
+      const {
+        data: joinedStaff,
+        error: joinError
+      } = await supabaseClient.rpc(
+        "join_store_by_invite",
+        {
+          p_invite_code: inviteCode,
+          p_name: staffName
+        }
       );
 
-    if(pending){
-      const { data: joinedStaff, error: joinError } =
-        await supabaseClient.rpc(
-          "join_store_by_invite",
-          {
-            p_invite_code: pending.inviteCode,
-            p_name: pending.name
-          }
+      if(joinError){
+        console.error(
+          "自動店舗参加エラー:",
+          joinError
         );
 
-      if(joinError){
-        console.error("自動店舗参加エラー:", joinError);
         alert(
           "店舗への参加に失敗しました。\n" +
           joinError.message
         );
+
         return;
       }
-
-      localStorage.removeItem("pendingStaffJoin");
 
       await loadCurrentStaff();
       await loadStoreName();
@@ -3306,11 +3320,16 @@ async function startApp(){
       return;
     }
 
-    // 参加情報がなければ店舗参加画面へ
+    // 情報がなければ通常の店舗参加画面
     showJoinStore();
 
   }catch(e){
-    console.error("アプリ起動エラー:", e);
+
+    console.error(
+      "アプリ起動エラー:",
+      e
+    );
+
     alert(
       "アプリの起動に失敗しました：\n" +
       (e.message || e)
