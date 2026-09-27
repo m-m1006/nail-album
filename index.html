@@ -459,6 +459,53 @@ textarea{
 
 </div>
 
+<div id="createStoreScreen" style="display:none;">
+  <h1>💅 Nail Album</h1>
+  <p>新しい店舗を作成</p>
+
+  <input
+    id="createStoreName"
+    type="text"
+    placeholder="店舗名"
+  >
+
+  <input
+    id="createStoreStaffName"
+    type="text"
+    placeholder="あなたの名前"
+  >
+
+  <input
+    id="createStoreEmail"
+    type="email"
+    placeholder="メールアドレス"
+  >
+
+  <input
+    id="createStorePassword"
+    type="password"
+    placeholder="パスワード（6文字以上）"
+  >
+
+  <button
+    class="primary"
+    style="width:100%"
+    onclick="createStoreAccount()"
+  >
+    店舗を作成
+  </button>
+
+  <button
+    class="secondary"
+    style="width:100%;margin-top:10px"
+    onclick="showSignup()"
+  >
+    ← 戻る
+  </button>
+
+  <p id="createStoreMessage"></p>
+</div>
+
 <!-- 店舗参加画面 -->
 <div id="joinStoreScreen" style="display:none">
 
