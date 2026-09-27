@@ -3174,6 +3174,16 @@ async function signupStaff(){
   }
 }
 
+async function logoutStaff(){
+
+  await supabaseClient.auth.signOut();
+
+  currentStaff = null;
+
+  showLogin();
+
+}
+
 function showCreateStore(){
 
   document.getElementById("signupScreen").style.display = "none";
