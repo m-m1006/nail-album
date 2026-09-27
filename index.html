@@ -446,6 +446,14 @@ textarea{
     スタッフ登録
   </button>
 
+<button
+  class="secondary"
+  style="width:100%;margin-top:10px"
+  onclick="showCreateStore()"
+>
+  🏪 新しく店舗を作る
+</button>
+  
   <button
     type="button"
     class="secondary"
@@ -3166,6 +3174,111 @@ async function signupStaff(){
   }
 }
 
+function showCreateStore(){
+
+  document.getElementById("signupScreen").style.display = "none";
+
+  document.getElementById("createStoreScreen").style.display = "block";
+
+}
+
+async function createStoreAccount(){
+
+  const storeName =
+    document.getElementById("createStoreName")
+      .value.trim();
+
+  const staffName =
+    document.getElementById("createStoreStaffName")
+      .value.trim();
+
+  const email =
+    document.getElementById("createStoreEmail")
+      .value.trim();
+
+  const password =
+    document.getElementById("createStorePassword")
+      .value;
+
+  const message =
+    document.getElementById("createStoreMessage");
+
+  if(
+    !storeName ||
+    !staffName ||
+    !email ||
+    !password
+  ){
+
+    message.textContent =
+      "すべて入力してください";
+
+    return;
+  }
+
+  if(password.length < 6){
+
+    message.textContent =
+      "パスワードは6文字以上にしてください";
+
+    return;
+  }
+
+  message.textContent =
+    "登録しています…";
+
+  try{
+
+    const { data, error } =
+      await supabaseClient.auth.signUp({
+
+        email: email,
+
+        password: password,
+
+        options: {
+
+          data: {
+
+            staff_name: staffName,
+
+            store_name: storeName,
+
+            create_store: true
+
+          },
+
+          emailRedirectTo:
+            "https://m-m1006.github.io/nail-album/"
+
+        }
+
+      });
+
+    if(error){
+
+      console.error(error);
+
+      message.textContent =
+        "登録できませんでした：" +
+        error.message;
+
+      return;
+    }
+
+    message.textContent =
+      "登録しました。メールを確認してからログインしてください。";
+
+  }catch(e){
+
+    console.error(e);
+
+    message.textContent =
+      "登録中にエラーが発生しました";
+
+  }
+
+}
 
 /* -------------------------
    ログイン中スタッフ取得
