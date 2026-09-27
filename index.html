@@ -3331,6 +3331,54 @@ async function startApp(){
     const inviteCode =
       user?.user_metadata?.invite_code;
 
+    const storeName =
+  user?.user_metadata?.store_name;
+
+　　　const createStore =
+  user?.user_metadata?.create_store;
+
+  // 新しい店舗を作成する場合
+if(
+  createStore &&
+  staffName &&
+  storeName
+){
+
+  const {
+    data: createdStaff,
+    error: createError
+  } = await supabaseClient.rpc(
+    "create_store_for_current_user",
+    {
+      p_store_name: storeName,
+      p_staff_name: staffName
+    }
+  );
+
+  if(createError){
+
+    console.error(
+      "店舗作成エラー:",
+      createError
+    );
+
+    alert(
+      "店舗の作成に失敗しました。\n" +
+      createError.message
+    );
+
+    return;
+  }
+
+  await loadCurrentStaff();
+  await loadStoreName();
+  await reload();
+  home();
+  showApp();
+
+  return;
+}
+    
     // 登録時の情報があれば自動で店舗参加
     if(staffName && inviteCode){
 
