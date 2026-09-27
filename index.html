@@ -950,14 +950,7 @@ const DB_NAME = "NailAlbumDB";
 const DB_VERSION = 1;
 const STORE = "samples";
 
-let categories = JSON.parse(
-  localStorage.getItem("nail_categories") ||
-  JSON.stringify([
-    {id:1,name:"シンプル"},
-    {id:2,name:"こだわり"},
-    {id:3,name:"フルオーダー"}
-  ])
-);
+let categories = [];
 
 /* =====================================================
    スタッフ
