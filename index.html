@@ -3405,6 +3405,16 @@ if(staffManageButton){
     ・${esc(storeName)}
   `;
 
+  loginInfo.innerHTML += `
+  <button
+    class="secondary"
+    style="margin-left:8px;padding:4px 10px;font-size:12px"
+    onclick="logoutStaff()"
+  >
+    ログアウト
+  </button>
+`;
+
   appScreen.prepend(
     loginInfo
   );
