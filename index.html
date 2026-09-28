@@ -3283,6 +3283,33 @@ async function createStoreAccount(){
 
 }
 
+async function loadCategories(){
+
+  if(!currentStaff){
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("category")
+      .select("id, name")
+      .eq("store_id", currentStaff.store_id)
+      .order("id", { ascending: true });
+
+  if(error){
+
+    console.error(
+      "カテゴリ取得エラー:",
+      error
+    );
+
+    return;
+  }
+
+  categories = data || [];
+
+}
+
 /* -------------------------
    ログイン中スタッフ取得
 ------------------------- */
