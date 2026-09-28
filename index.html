@@ -1809,9 +1809,9 @@ function renderCategoryManager(){
 }
 
 
-function renameCategory(id,name){
+async function renameCategory(id,name){
 
-  name=name.trim();
+  name = name.trim();
 
   if(!name){
 
@@ -1828,8 +1828,8 @@ function renameCategory(id,name){
   const duplicate =
     categories.some(
       c =>
-        c.id!==id &&
-        c.name===name
+        c.id !== id &&
+        c.name === name
     );
 
   if(duplicate){
@@ -1846,16 +1846,38 @@ function renameCategory(id,name){
 
   const c =
     categories.find(
-      x=>x.id===id
+      x => x.id === id
     );
 
-  if(c){
-
-    c.name=name;
-
+  if(!c){
+    return;
   }
 
-  saveCategories();
+  const { error } =
+    await supabaseClient
+      .from("category")
+      .update({
+        name: name
+      })
+      .eq("id", id)
+      .eq("store_id", currentStaff.store_id);
+
+  if(error){
+
+    console.error(
+      "カテゴリー変更エラー:",
+      error
+    );
+
+    alert(
+      "カテゴリーの変更に失敗しました。\n" +
+      error.message
+    );
+
+    return;
+  }
+
+  c.name = name;
 
   renderCategoryManager();
 
@@ -1871,7 +1893,6 @@ function renameCategory(id,name){
   }
 
 }
-
 
 function addCategory(){
 
