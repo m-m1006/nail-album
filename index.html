@@ -1953,10 +1953,10 @@ async function removeCategory(id){
 
   const count =
     S.filter(
-      s=>s.c==id
+      s => s.c == id
     ).length;
 
-  if(count>0){
+  if(count > 0){
 
     alert(
       "このカテゴリーにはサンプルが入っているため削除できません。\n先にサンプルを削除してください。"
@@ -1966,7 +1966,7 @@ async function removeCategory(id){
 
   }
 
-  if(categories.length<=1){
+  if(categories.length <= 1){
 
     alert(
       "カテゴリーは最低1つ必要です"
@@ -1978,25 +1978,51 @@ async function removeCategory(id){
 
   const c =
     categories.find(
-      x=>x.id===id
+      x => x.id === id
     );
+
+  if(!c){
+    return;
+  }
 
   if(
     !confirm(
       `「${c.name}」を削除する？`
     )
-  ) return;
+  ){
+    return;
+  }
+
+  const { error } =
+    await supabaseClient
+      .from("category")
+      .delete()
+      .eq("id", id)
+      .eq("store_id", currentStaff.store_id);
+
+  if(error){
+
+    console.error(
+      "カテゴリー削除エラー:",
+      error
+    );
+
+    alert(
+      "カテゴリーの削除に失敗しました。\n" +
+      error.message
+    );
+
+    return;
+  }
 
   categories =
     categories.filter(
-      x=>x.id!==id
+      x => x.id !== id
     );
 
-  saveCategories();
+  if(co === id){
 
-  if(co===id){
-
-    co=categories[0].id;
+    co = categories[0].id;
 
   }
 
@@ -2005,7 +2031,6 @@ async function removeCategory(id){
   home();
 
 }
-
 
 /* =====================================================
    共通
