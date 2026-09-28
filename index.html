@@ -1717,12 +1717,37 @@ function dataURLtoBlob(dataURL){
    カテゴリー
 ===================================================== */
 
-function saveCategories(){
+async function saveCategories(){
 
-  localStorage.setItem(
-    "nail_categories",
-    JSON.stringify(categories)
-  );
+  if(!currentStaff){
+    return;
+  }
+
+  const updates =
+    categories.map(c => ({
+      id: c.id,
+      name: c.name,
+      store_id: currentStaff.store_id
+    }));
+
+  const { error } =
+    await supabaseClient
+      .from("category")
+      .upsert(updates);
+
+  if(error){
+
+    console.error(
+      "カテゴリ保存エラー:",
+      error
+    );
+
+    alert(
+      "カテゴリの保存に失敗しました。\n" +
+      error.message
+    );
+
+  }
 
 }
 
