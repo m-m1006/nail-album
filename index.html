@@ -3655,14 +3655,14 @@ if(
         return;
       }
 
-      await loadCurrentStaff();
-      await loadCategories();
-      await loadStoreName();
-      await reload();
-      home();
-      showApp();
-      return;
-    }
+  await loadCurrentStaff();
+  await loadCategories();
+  await loadStoreName();
+  await reload();
+  home();
+  showApp();
+
+  return;
 
     // 情報がなければ通常の店舗参加画面
     showJoinStore();
