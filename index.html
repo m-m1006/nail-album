@@ -3559,12 +3559,13 @@ async function startApp(){
 
     // すでにスタッフ登録済みなら、そのままアプリへ
     if(staff){
-      await loadStoreName();
-      await reload();
-      home();
-      showApp();
-      return;
-    }
+  await loadCategories();
+  await loadStoreName();
+  await reload();
+  home();
+  showApp();
+  return;
+}
 
     // 登録時にSupabaseアカウントへ保存した
     // 名前＋招待コードを取得
@@ -3619,13 +3620,13 @@ if(
   }
 
   await loadCurrentStaff();
+  await loadCategories();
   await loadStoreName();
   await reload();
   home();
   showApp();
 
   return;
-}
     
     // 登録時の情報があれば自動で店舗参加
     if(staffName && inviteCode){
