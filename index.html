@@ -3557,27 +3557,33 @@ if(staffManageButton){
 ------------------------- */
 
 async function startApp(){
+
   try{
+
     await openDB();
 
-    const staff = await loadCurrentStaff();
+    const staff =
+      await loadCurrentStaff();
 
     // すでにスタッフ登録済みなら、そのままアプリへ
     if(staff){
-  await loadCategories();
-  await loadStoreName();
-  await reload();
-  home();
-  showApp();
-  return;
-}
 
-    // 登録時にSupabaseアカウントへ保存した
-    // 名前＋招待コードを取得
+      await loadCategories();
+      await loadStoreName();
+      await reload();
+
+      home();
+      showApp();
+
+      return;
+    }
+
+    // 登録時にSupabaseアカウントへ保存した情報
     const userResult =
       await supabaseClient.auth.getUser();
 
-    const user = userResult.data.user;
+    const user =
+      userResult.data.user;
 
     const staffName =
       user?.user_metadata?.staff_name;
@@ -3586,68 +3592,85 @@ async function startApp(){
       user?.user_metadata?.invite_code;
 
     const storeName =
-  user?.user_metadata?.store_name;
+      user?.user_metadata?.store_name;
 
-　　　const createStore =
-  user?.user_metadata?.create_store;
+    const createStore =
+      user?.user_metadata?.create_store;
 
-  // 新しい店舗を作成する場合
-if(
-  createStore &&
-  staffName &&
-  storeName
-){
 
-  const {
-    data: createdStaff,
-    error: createError
-  } = await supabaseClient.rpc(
-    "create_store_for_current_user",
-    {
-      p_store_name: storeName,
-      p_staff_name: staffName
+    // =========================
+    // 新しい店舗を作成する場合
+    // =========================
+
+    if(
+      createStore &&
+      staffName &&
+      storeName
+    ){
+
+      const {
+        data: createdStaff,
+        error: createError
+      } =
+        await supabaseClient.rpc(
+          "create_store_for_current_user",
+          {
+            p_store_name: storeName,
+            p_staff_name: staffName
+          }
+        );
+
+      if(createError){
+
+        console.error(
+          "店舗作成エラー:",
+          createError
+        );
+
+        alert(
+          "店舗の作成に失敗しました。\n" +
+          createError.message
+        );
+
+        return;
+      }
+
+      await loadCurrentStaff();
+      await loadCategories();
+      await loadStoreName();
+      await reload();
+
+      home();
+      showApp();
+
+      return;
     }
-  );
 
-  if(createError){
 
-    console.error(
-      "店舗作成エラー:",
-      createError
-    );
+    // =========================
+    // 登録時の情報があれば
+    // 自動で店舗参加
+    // =========================
 
-    alert(
-      "店舗の作成に失敗しました。\n" +
-      createError.message
-    );
-
-    return;
-  }
-
-  await loadCurrentStaff();
-  await loadCategories();
-  await loadStoreName();
-  await reload();
-  home();
-  showApp();
-
-  return;
-    
-    // 登録時の情報があれば自動で店舗参加
-    if(staffName && inviteCode){
+    if(
+      staffName &&
+      inviteCode
+    ){
 
       const {
         data: joinedStaff,
         error: joinError
-      } = await supabaseClient.rpc(
-        "join_store_by_invite",
-        {
-          p_invite_code: inviteCode,
-          p_name: staffName
-        }
-      );
+      } =
+        await supabaseClient.rpc(
+          "join_store_by_invite",
+          {
+            p_invite_code: inviteCode,
+            p_name: staffName
+          }
+        );
 
       if(joinError){
+
         console.error(
           "自動店舗参加エラー:",
           joinError
@@ -3661,16 +3684,23 @@ if(
         return;
       }
 
-  await loadCurrentStaff();
-  await loadCategories();
-  await loadStoreName();
-  await reload();
-  home();
-  showApp();
+      await loadCurrentStaff();
+      await loadCategories();
+      await loadStoreName();
+      await reload();
 
-  return;
+      home();
+      showApp();
 
-    // 情報がなければ通常の店舗参加画面
+      return;
+    }
+
+
+    // =========================
+    // 情報がなければ
+    // 通常の店舗参加画面
+    // =========================
+
     showJoinStore();
 
   }catch(e){
@@ -3684,7 +3714,9 @@ if(
       "アプリの起動に失敗しました：\n" +
       (e.message || e)
     );
+
   }
+
 }
 
 /* -------------------------
