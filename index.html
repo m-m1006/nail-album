@@ -580,21 +580,12 @@ textarea{
     </button>
 
     <button
-  id="staffManageButton"
-  class="secondary"
-  style="width:100%"
-  onclick="openStaffManager()"
->
-  👤 スタッフを管理
-</button>
-
-    <button
-      id="storeSettingButton"
+      id="storeInfoButton"
       class="secondary"
       style="width:100%"
-      onclick="openStoreSettings()"
+      onclick="openStoreInfo()"
     >
-      🏪 店舗設定
+      🏪 店舗情報
     </button>
 
 </div>
@@ -767,12 +758,12 @@ textarea{
 
 </div>
 
-<!-- 店舗設定 -->
-<div id="storeSettings" class="modal">
+<!-- 店舗情報 -->
+<div id="storeInfo" class="modal">
 
   <div class="sheet">
 
-    <h2>🏪 店舗設定</h2>
+    <h2>🏪 店舗情報</h2>
 
     <label>店舗名</label>
 
@@ -790,18 +781,37 @@ textarea{
       保存
     </button>
 
-    <button
-      class="secondary choice"
-      style="margin-top:10px"
-      onclick="closeM('storeSettings')"
-    >
-      閉じる
-    </button>
-
     <div
       id="storeSettingMessage"
       class="status"
     ></div>
+
+    <h3 style="margin-top:30px">
+      その他の設定
+    </h3>
+
+    <button
+      class="secondary choice"
+      onclick="openAppDesignSettings()"
+    >
+      🎨 アプリデザイン
+    </button>
+
+    <button
+      id="staffManageButton"
+      class="secondary choice"
+      onclick="openStaffManager()"
+    >
+      👤 スタッフ管理
+    </button>
+
+    <button
+      class="secondary choice"
+      style="margin-top:15px"
+      onclick="closeM('storeInfo')"
+    >
+      閉じる
+    </button>
 
   </div>
 
@@ -1243,6 +1253,11 @@ async function loadStoreName(){
     storeName;
 }
 
+function openStoreInfo(){
+
+  openStoreSettings();
+
+}
 
 /* 店舗設定を開く */
 async function openStoreSettings(){
@@ -1269,9 +1284,9 @@ async function openStoreSettings(){
 
   $("storeSettingMessage").textContent = "";
 
-  $("storeSettings")
-    .classList
-    .add("open");
+$("storeInfo")
+  .classList
+  .add("open");
 }
 
 
@@ -1337,7 +1352,7 @@ async function saveStoreName(){
 
   setTimeout(() => {
 
-    closeM("storeSettings");
+  closeM("storeInfo");
 
   }, 500);
 
