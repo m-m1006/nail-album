@@ -3491,6 +3491,16 @@ if(staffManageButton){
       : "none";
 
 }
+
+const storeInfoButton =
+  document.getElementById("storeInfoButton");
+
+if(storeInfoButton){
+  storeInfoButton.style.display =
+    currentStaff.role === "owner"
+      ? ""
+      : "none";
+}
   
   console.log(
     "ログインユーザー:",
