@@ -984,6 +984,17 @@ function selectAppDesign(design){
     greige: "🩶 グレージュ"
   };
 
+  document.body.classList.remove(
+    "theme-natural",
+    "theme-monotone",
+    "theme-pink",
+    "theme-greige"
+  );
+
+  document.body.classList.add(
+    "theme-" + design
+  );
+
   alert(
     "「" + names[design] + "」を選択しました！"
   );
