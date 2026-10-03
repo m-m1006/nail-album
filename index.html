@@ -38,11 +38,13 @@ button,input,textarea,select{
 
 header{
   padding:18px 16px;
-  border-bottom:1px solid #eee;
+  border-bottom:1px solid var(--accent-color);
   position:sticky;
   top:0;
-  background:#fff;
+  background:var(--header-bg);
+  color:var(--text-color);
   z-index:5;
+}
 }
 
 main{
@@ -376,6 +378,7 @@ body.theme-natural{
   --text-color:#302b2a;
   --button-bg:#eee9e7;
   --button-text:#554f4c;
+  --header-bg:#fffdf9;
 }
 
 body.theme-monotone{
@@ -385,6 +388,7 @@ body.theme-monotone{
   --text-color:#222222;
   --button-bg:#e8e8e8;
   --button-text:#333333;
+  --header-bg:#ffffff;
 }
 
 body.theme-pink{
@@ -394,6 +398,7 @@ body.theme-pink{
   --text-color:#554244;
   --button-bg:#f4dfe3;
   --button-text:#76545c;
+  --header-bg:#fffafb;
 }
 
 body.theme-greige{
@@ -403,6 +408,7 @@ body.theme-greige{
   --text-color:#4e4a47;
   --button-bg:#e7e2de;
   --button-text:#5d5752;
+  --header-bg:#faf9f7;
 }
 </style>
 </head>
