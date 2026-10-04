@@ -1037,6 +1037,38 @@ async function selectAppDesign(design){
   );
 }
 
+async function loadAppDesign(){
+
+  if(!currentStaff){
+    return;
+  }
+
+  const { data, error } =
+    await supabaseClient
+      .from("store")
+      .select("app_design")
+      .eq("id", currentStaff.store_id)
+      .single();
+
+  if(error){
+    console.error("アプリデザイン取得エラー:", error);
+    return;
+  }
+
+  const design = data?.app_design || "natural";
+
+  document.body.classList.remove(
+    "theme-natural",
+    "theme-monotone",
+    "theme-pink",
+    "theme-brown"
+  );
+
+  document.body.classList.add(
+    "theme-" + design
+  );
+}
+
 /* =====================================================
    招待コード
 ===================================================== */
