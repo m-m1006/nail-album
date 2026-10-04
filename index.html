@@ -3752,6 +3752,7 @@ async function startApp(){
     // すでにスタッフ登録済みなら、そのままアプリへ
     if(staff){
 
+      await loadAppDesign();
       await loadCategories();
       await loadStoreName();
       await reload();
