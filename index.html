@@ -1000,7 +1000,7 @@ function openAppDesignSettings(){
 
 }
 
-function selectAppDesign(design){
+async function selectAppDesign(design){
 
   const names = {
     natural: "🌿 ナチュラル",
@@ -1020,10 +1020,21 @@ function selectAppDesign(design){
     "theme-" + design
   );
 
-  alert(
-    "「" + names[design] + "」を選択しました！"
-  );
+  const { error } =
+    await supabaseClient
+      .from("store")
+      .update({ app_design: design })
+      .eq("id", currentStaff.store_id);
 
+  if(error){
+    console.error("デザイン保存エラー:", error);
+    alert("デザインの保存に失敗しました");
+    return;
+  }
+
+  alert(
+    "「" + names[design] + "」を保存しました！"
+  );
 }
 
 /* =====================================================
