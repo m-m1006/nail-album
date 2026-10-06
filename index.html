@@ -1058,6 +1058,52 @@ async function selectAppDesign(design){
     "theme-" + design
   );
 
+  const designIds = [
+  "natural",
+  "monotone",
+  "pink",
+  "brown"
+];
+
+designIds.forEach(id => {
+  const button = document.getElementById("design-" + id);
+
+  if(button){
+    button.textContent =
+      button.textContent.replace(" ✓", "");
+  }
+});
+
+const selectedButton =
+  document.getElementById("design-" + design);
+
+if(selectedButton){
+  selectedButton.textContent += " ✓";
+}
+
+  const designIds = [
+  "natural",
+  "monotone",
+  "pink",
+  "brown"
+];
+
+designIds.forEach(id => {
+  const button = document.getElementById("design-" + id);
+
+  if(button){
+    button.textContent =
+      button.textContent.replace(" ✓", "");
+  }
+});
+
+const selectedButton =
+  document.getElementById("design-" + design);
+
+if(selectedButton){
+  selectedButton.textContent += " ✓";
+}
+
   const { error } =
     await supabaseClient
       .from("staff")
