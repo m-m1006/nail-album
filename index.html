@@ -1056,9 +1056,9 @@ async function selectAppDesign(design){
 
   const { error } =
     await supabaseClient
-      .from("store")
-      .update({ app_design: design })
-      .eq("id", currentStaff.store_id);
+      .from("staff")
+　　　　.update({ app_design: design })
+　　　　.eq("id", currentStaff.id);
 
   if(error){
     console.error("デザイン保存エラー:", error);
