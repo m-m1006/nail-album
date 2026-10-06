@@ -943,6 +943,43 @@ body.theme-brown{
 
 </div>
 
+<div id="settings" class="modal">
+  <div class="sheet">
+    <h2>⚙️ 設定</h2>
+
+    <button
+      class="secondary choice"
+      onclick="openAppDesignSettings()"
+    >
+      🎨 アプリデザイン
+    </button>
+
+    <button
+      class="secondary choice"
+      onclick="openCategoryManager()"
+    >
+      🗂️ カテゴリー管理
+    </button>
+
+    <button
+      class="secondary choice"
+      onclick="logoutStaff()"
+    >
+      🚪 ログアウト
+    </button>
+
+    <button
+      class="secondary choice"
+      style="margin-top:15px"
+      onclick="closeM('settings')"
+    >
+      閉じる
+    </button>
+    
+  </div>
+  
+</div>
+
 <!-- アプリデザイン設定 -->
 <div id="appDesignSettings" class="modal">
 
@@ -999,6 +1036,10 @@ body.theme-brown{
 </div>
 
 <script>
+
+function openSettings(){
+  $("settings").classList.add("open");
+}
 
 function openAppDesignSettings(){
 
