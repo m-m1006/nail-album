@@ -45,7 +45,6 @@ header{
   color:var(--text-color);
   z-index:5;
 }
-}
 
 main{
   padding:16px;
@@ -1059,60 +1058,48 @@ async function selectAppDesign(design){
   );
 
   const designIds = [
-  "natural",
-  "monotone",
-  "pink",
-  "brown"
-];
+    "natural",
+    "monotone",
+    "pink",
+    "brown"
+  ];
 
-designIds.forEach(id => {
-  const button = document.getElementById("design-" + id);
+  designIds.forEach(id => {
 
-  if(button){
-    button.textContent =
-      button.textContent.replace(" ✓", "");
+    const button =
+      document.getElementById("design-" + id);
+
+    if(button){
+      button.textContent =
+        button.textContent.replace(" ✓", "");
+    }
+
+  });
+
+  const selectedButton =
+    document.getElementById("design-" + design);
+
+  if(selectedButton){
+    selectedButton.textContent += " ✓";
   }
-});
-
-const selectedButton =
-  document.getElementById("design-" + design);
-
-if(selectedButton){
-  selectedButton.textContent += " ✓";
-}
-
-  const designIds = [
-  "natural",
-  "monotone",
-  "pink",
-  "brown"
-];
-
-designIds.forEach(id => {
-  const button = document.getElementById("design-" + id);
-
-  if(button){
-    button.textContent =
-      button.textContent.replace(" ✓", "");
-  }
-});
-
-const selectedButton =
-  document.getElementById("design-" + design);
-
-if(selectedButton){
-  selectedButton.textContent += " ✓";
-}
 
   const { error } =
     await supabaseClient
       .from("staff")
-　　　　.update({ app_design: design })
-　　　　.eq("id", currentStaff.id);
+      .update({
+        app_design: design
+      })
+      .eq("id", currentStaff.id);
 
   if(error){
-    console.error("デザイン保存エラー:", error);
+
+    console.error(
+      "デザイン保存エラー:",
+      error
+    );
+
     alert("デザインの保存に失敗しました");
+
     return;
   }
 
@@ -1120,7 +1107,7 @@ if(selectedButton){
     "「" + names[design] + "」を保存しました！"
   );
 }
-
+  
 async function loadAppDesign(){
 
   if(!currentStaff){
