@@ -1494,7 +1494,7 @@ async function loadStoreName(){
   const { data, error } =
     await supabaseClient
       .from("store")
-      .select("id, name")
+      .select("id, name, app_design")
       .eq("id", currentStaff.store_id)
       .single();
 
@@ -1513,6 +1513,59 @@ async function loadStoreName(){
 
   $("storeNameInput").value =
     storeName;
+
+
+  /* =========================
+     アプリデザインを読み込む
+  ========================= */
+
+  const design =
+    data?.app_design || "natural";
+
+  document.body.classList.remove(
+    "theme-natural",
+    "theme-monotone",
+    "theme-pink",
+    "theme-brown"
+  );
+
+  document.body.classList.add(
+    "theme-" + design
+  );
+
+
+  /* チェックマークを更新 */
+
+  const designIds = [
+    "natural",
+    "monotone",
+    "pink",
+    "brown"
+  ];
+
+  designIds.forEach(id => {
+
+    const button =
+      document.getElementById("design-" + id);
+
+    if(button){
+
+      button.textContent =
+        button.textContent.replace(" ✓", "");
+
+    }
+
+  });
+
+  const selectedButton =
+    document.getElementById("design-" + design);
+
+  if(selectedButton){
+
+    selectedButton.textContent += " ✓";
+
+  }
+
 }
 
 function openStoreInfo(){
