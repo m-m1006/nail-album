@@ -1085,11 +1085,11 @@ async function selectAppDesign(design){
 
   const { error } =
     await supabaseClient
-      .from("staff")
+      .from("store")
       .update({
         app_design: design
       })
-      .eq("id", currentStaff.id);
+      .eq("id", currentStaff.store_id);
 
   if(error){
 
