@@ -1354,22 +1354,17 @@ async function selectAppDesign(design){
 
   designIds.forEach(id => {
 
-    const button =
-      document.getElementById("design-" + id);
+  const button =
+    document.getElementById("design-" + id);
 
-    if(button){
-      button.textContent =
-        button.textContent.replace(" ✓", "");
-    }
-
-  });
-
-  const selectedButton =
-    document.getElementById("design-" + design);
-
-  if(selectedButton){
-    selectedButton.textContent += " ✓";
+  if(button){
+    button.classList.toggle(
+      "selected",
+      id === design
+    );
   }
+
+});
 
   const { error } =
     await supabaseClient
