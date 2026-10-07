@@ -420,6 +420,151 @@ body.theme-brown{
   --sheet-bg:#faf7f5;
 }
 
+/* =====================================================
+   アプリデザイン選択プレビュー
+===================================================== */
+
+.design-card{
+  width:100%;
+  padding:10px;
+  margin-bottom:14px;
+  border-radius:16px;
+  text-align:left;
+  background:var(--button-bg);
+  border:2px solid transparent;
+  color:var(--button-text);
+}
+
+/* プレビュー本体 */
+.design-preview{
+  display:block;
+  width:100%;
+  height:115px;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid #ddd;
+  background:#fff;
+  margin-bottom:9px;
+  box-sizing:border-box;
+}
+
+/* 上のヘッダー */
+.preview-header{
+  display:block;
+  height:28px;
+  padding:7px 10px;
+  box-sizing:border-box;
+  font-size:10px;
+  font-weight:bold;
+}
+
+/* サンプル */
+.preview-title{
+  display:block;
+  padding:8px 10px 5px;
+  font-size:11px;
+  font-weight:bold;
+}
+
+/* 写真3枚 */
+.preview-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:4px;
+  padding:0 8px;
+}
+
+.preview-grid span{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:55px;
+  border-radius:5px;
+  font-size:18px;
+}
+
+
+/* =========================
+   ナチュラル
+========================= */
+
+.design-natural-card .design-preview{
+  background:#fffdf9;
+  border-color:#d8c9a8;
+}
+
+.design-natural-card .preview-header{
+  background:#6f8b6b;
+  color:white;
+}
+
+.design-natural-card .preview-title{
+  color:#302b2a;
+}
+
+.design-natural-card .preview-grid span{
+  background:#f5f1e8;
+}
+
+
+/* =========================
+   モノトーン
+========================= */
+
+.design-monotone-card .design-preview{
+  background:#fff;
+  border-color:#aaa;
+}
+
+.design-monotone-card .preview-header{
+  background:#222;
+  color:white;
+}
+
+.design-monotone-card .preview-title{
+  color:#222;
+}
+
+.design-monotone-card .preview-grid span{
+  background:#eeeeee;
+}
+
+
+/* =========================
+   ピンクベージュ
+========================= */
+
+.design-pink-card .design-preview{
+  background:#fffafb;
+  border-color:#e5c3c9;
+}
+
+.design-pink-card .preview-header{
+  background:#c58f9a;
+  color:white;
+}
+
+.design-pink-card .preview-title{
+  color:#554244;
+}
+
+.design-pink-card .preview-grid span{
+  background:#fbf1f2;
+}
+
+
+/* =========================
+   ブラウン
+========================= */
+
+.design-brown-card .design-preview{
+  background:#faf7f5;
+  border-color:#d2c5be;
+}
+
+.design-brown-card .preview-header{
+  background:#302b2
+
 /* アプリデザイン選択カード */
 
 .design-card{
